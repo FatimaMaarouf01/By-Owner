@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
-import { PropertySubmission, TFunction, Language, Property } from '../types';
-import { SubmissionDetailModal } from './SubmissionDetailModal';
+import React from 'react';
+import SubmissionDetailModal from './SubmissionDetailModal';
+import { PropertySubmission, Property, TFunction } from '../types';
 
 interface AdminViewProps {
     pendingSubmissions: PropertySubmission[];
@@ -11,10 +11,10 @@ interface AdminViewProps {
     onReject: (id: number) => void;
     onRemovePublished: (id: number) => void;
     t: TFunction;
-    language: Language;
+    language: string;
 }
 
-export const AdminView: React.FC<AdminViewProps> = ({ 
+const AdminView = ({ 
     pendingSubmissions, 
     approvedSubmissions,
     mockProperties,
@@ -23,14 +23,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
     onRemovePublished,
     t, 
     language 
-}) => {
-    const [selectedPendingSubmission, setSelectedPendingSubmission] = useState<PropertySubmission | null>(null);
-    const [selectedPublishedSubmission, setSelectedPublishedSubmission] = useState<PropertySubmission | null>(null);
-    const [activeTab, setActiveTab] = useState<'pending' | 'published'>('pending');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [loginError, setLoginError] = useState('');
+}: AdminViewProps) => {
+    const [selectedPendingSubmission, setSelectedPendingSubmission] = React.useState<PropertySubmission | null>(null);
+    const [selectedPublishedSubmission, setSelectedPublishedSubmission] = React.useState<PropertySubmission | null>(null);
+    const [activeTab, setActiveTab] = React.useState('pending');
+    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+    const [username, setUsername] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [loginError, setLoginError] = React.useState('');
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -116,7 +116,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                                 <div>
                                     <span className='inline-block text-sm font-semibold px-3 py-1 rounded-full mb-3 capitalize bg-yellow-200 text-yellow-800'>
-                                        {t(sub.property.type)}
+                                        {t(sub.property.type as any)}
                                     </span>
                                     <h3 className="text-xl font-bold text-brand-primary mb-1">{sub.property.fullAddress}</h3>
                                     <p className="text-gray-600 text-sm">{t('owner_name')}: {sub.ownerName} | {sub.ownerPhone}</p>
@@ -156,7 +156,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                                 <div>
                                     <span className={`inline-block text-sm font-semibold px-3 py-1 rounded-full mb-3 capitalize bg-green-200 text-green-800`}>
-                                        {t(sub.property.type)}
+                                        {t(sub.property.type as any)}
                                     </span>
                                     <h3 className="text-xl font-bold text-brand-primary mb-1">{sub.property.fullAddress}</h3>
                                 </div>
@@ -185,7 +185,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                                 <div>
                                     <span className={`inline-block text-sm font-semibold px-3 py-1 rounded-full mb-3 capitalize bg-blue-200 text-blue-800`}>
-                                        {t(prop.type)} (Mock)
+                                        {t(prop.type as any)} (Mock)
                                     </span>
                                     <h3 className="text-xl font-bold text-brand-primary mb-1">{prop.address[language] || prop.address.en}</h3>
                                 </div>
@@ -260,3 +260,5 @@ export const AdminView: React.FC<AdminViewProps> = ({
         </>
     );
 };
+
+export default AdminView;

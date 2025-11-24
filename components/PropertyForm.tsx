@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { TFunction, Language, PropertyType, PropertySubmission } from '../types';
-import { UploadIcon } from './icons/UploadIcon';
 
-interface PropertyFormProps {
-    t: TFunction;
-    language: Language;
-    onSubmitSuccess: (submission: PropertySubmission) => void;
+import React from 'react';
+import UploadIcon from './icons/UploadIcon';
+import { TFunction, PropertySubmission, PropertyType } from '../types';
+
+interface FormSectionProps {
+    title: string;
+    children: React.ReactNode;
 }
 
-const FormSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+const FormSection = ({ title, children }: FormSectionProps) => (
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg mb-8">
         <h3 className="text-2xl font-bold text-brand-primary mb-6 border-b-2 border-brand-secondary pb-3">{title}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -17,8 +17,7 @@ const FormSection: React.FC<{ title: string; children: React.ReactNode }> = ({ t
     </div>
 );
 
-const InputField: React.FC<{ label: string; placeholder: string; type?: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; required?: boolean; fullWidth?: boolean;}> = 
-({ label, placeholder, type = 'text', name, value, onChange, required=false, fullWidth=false }) => (
+const InputField = ({ label, placeholder, type = 'text', name, value, onChange, required=false, fullWidth=false }: any) => (
     <div className={fullWidth ? 'md:col-span-2' : ''}>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
         <input
@@ -34,8 +33,16 @@ const InputField: React.FC<{ label: string; placeholder: string; type?: string; 
     </div>
 );
 
-const SelectField: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; children: React.ReactNode; required?: boolean; }> = 
-({ label, name, value, onChange, children, required=false }) => (
+interface SelectFieldProps {
+    label: string;
+    name: string;
+    value: string | number;
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    children: React.ReactNode;
+    required?: boolean;
+}
+
+const SelectField = ({ label, name, value, onChange, children, required=false }: SelectFieldProps) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
         <select
@@ -51,10 +58,9 @@ const SelectField: React.FC<{ label: string; name: string; value: string; onChan
     </div>
 );
 
-const FileInput: React.FC<{ label: string; hint: string; name: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; accept: string; multiple?: boolean; required?: boolean; t: TFunction; }> =
-({ label, hint, name, onChange, accept, multiple=false, required=false, t}) => {
-    const [fileName, setFileName] = useState('');
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const FileInput = ({ label, hint, name, onChange, accept, multiple=false, required=false, t}: any) => {
+    const [fileName, setFileName] = React.useState('');
+    const handleFileChange = (e: any) => {
         if (e.target.files && e.target.files.length > 0) {
             if (multiple) {
                 setFileName(`${e.target.files.length} files selected`);
@@ -88,11 +94,17 @@ const FileInput: React.FC<{ label: string; hint: string; name: string; onChange:
     );
 }
 
-export const PropertyForm: React.FC<PropertyFormProps> = ({ t, language, onSubmitSuccess }) => {
-    const [formData, setFormData] = useState({
+interface PropertyFormProps {
+    t: TFunction;
+    language: string;
+    onSubmitSuccess: (submission: PropertySubmission) => void;
+}
+
+const PropertyForm = ({ t, language, onSubmitSuccess }: PropertyFormProps) => {
+    const [formData, setFormData] = React.useState({
         ownerName: '',
         ownerPhone: '',
-        propertyType: '',
+        propertyType: '' as PropertyType | '',
         propertySize: '',
         bedrooms: '0',
         livingRooms: '0',
@@ -113,14 +125,10 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({ t, language, onSubmi
         description: '',
     });
 
-    const [files, setFiles] = useState<{
-        propertyImages: FileList | null;
-        documents: FileList | null;
-        ownerId: FileList | null;
-    }>({
-        propertyImages: null,
-        documents: null,
-        ownerId: null,
+    const [files, setFiles] = React.useState({
+        propertyImages: null as FileList | null,
+        documents: null as FileList | null,
+        ownerId: null as FileList | null,
     });
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -159,7 +167,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({ t, language, onSubmi
         return Promise.all(promises);
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const [uploadedImages, uploadedDocuments, uploadedOwnerId] = await Promise.all([
@@ -204,7 +212,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({ t, language, onSubmi
         onSubmitSuccess(newSubmission);
     };
 
-    const propertyType = formData.propertyType as PropertyType | '';
+    const propertyType = formData.propertyType;
     const showBuildingFields = propertyType === 'apartment' || propertyType === 'commercial';
     const showRoomFields = propertyType === 'apartment' || propertyType === 'villa' || propertyType === 'commercial';
 
@@ -266,7 +274,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({ t, language, onSubmi
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">{t('electricity_source')} <span className="text-red-500">*</span></label>
                     <div className="flex flex-wrap gap-x-6 gap-y-2">
-                        {(['solar', 'building_generator', 'other'] as const).map(source => (
+                        {['solar', 'building_generator', 'other'].map(source => (
                             <div key={source} className="flex items-center">
                                 <input
                                     id={`electricity_${source}`}
@@ -278,7 +286,7 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({ t, language, onSubmi
                                     className="h-4 w-4 text-brand-secondary border-gray-300 rounded focus:ring-brand-secondary"
                                 />
                                 <label htmlFor={`electricity_${source}`} className="ms-2 block text-sm text-gray-900 rtl:me-2 rtl:ms-0">
-                                    {t(source)}
+                                    {t(source as any)}
                                 </label>
                             </div>
                         ))}
@@ -315,3 +323,5 @@ export const PropertyForm: React.FC<PropertyFormProps> = ({ t, language, onSubmi
         </form>
     );
 };
+
+export default PropertyForm;

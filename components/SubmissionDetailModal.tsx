@@ -1,26 +1,22 @@
-import React, { useState } from 'react';
-import { PropertySubmission, TFunction, Language } from '../types';
-import { PdfIcon } from './icons/PdfIcon';
 
-interface SubmissionDetailModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  submission: PropertySubmission;
-  onApprove: (coverImage: string) => void;
-  onReject: () => void;
-  t: TFunction;
-  language: Language;
-  viewMode?: 'review' | 'viewOnly';
+import React from 'react';
+import PdfIcon from './icons/PdfIcon';
+import { PropertySubmission, TFunction } from '../types';
+
+interface DetailSectionModalProps {
+    title: string;
+    children: React.ReactNode;
+    gridCols?: number;
 }
 
-const DetailSection: React.FC<{ title: string; children: React.ReactNode; gridCols?: number }> = ({ title, children, gridCols = 2 }) => (
+const DetailSectionModal = ({ title, children, gridCols = 2 }: DetailSectionModalProps) => (
     <div>
       <h3 className="text-lg font-bold text-brand-primary mb-3 border-b pb-2">{title}</h3>
       <div className={`grid grid-cols-1 md:grid-cols-${gridCols} gap-x-6 gap-y-2 text-sm`}>{children}</div>
     </div>
 );
 
-const DetailRow: React.FC<{ label: string; value: string | number | boolean | undefined | string[] }> = ({ label, value }) => (
+const DetailRowModal = ({ label, value }: { label: string, value: any }) => (
   <div className="flex justify-between py-1 items-start">
     <span className="font-semibold text-gray-600 flex-shrink-0">{label}:</span>
     <span className="text-gray-900 text-right ps-2">{
@@ -32,7 +28,7 @@ const DetailRow: React.FC<{ label: string; value: string | number | boolean | un
   </div>
 );
 
-const FilePreview: React.FC<{ fileSrc: string; index: number; type: 'doc' | 'id' | 'img'; t: TFunction;}> = ({ fileSrc, index, type, t }) => {
+const FilePreview = ({ fileSrc, index, type, t }: any) => {
     const isPdf = fileSrc.startsWith('data:application/pdf');
     return (
         <a 
@@ -54,8 +50,34 @@ const FilePreview: React.FC<{ fileSrc: string; index: number; type: 'doc' | 'id'
     );
 };
 
+interface SubmissionDetailModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    submission: PropertySubmission;
+    onApprove: (coverImage: string) => void;
+    onReject: (id: number) => void; // Fixed signature to match usage in AdminView (Wait, AdminView passes handleReject which takes no args, but here it is passed as onReject. Actually handleReject in AdminView takes no args but uses selectedPendingSubmission state. Here it's passed as onClick={onReject}. Wait, onReject prop expects? AdminView passes `handleReject`. `handleReject` is `() => void`. So prop should be `() => void`. )
+    // Correction: In AdminView handleReject calls onReject(id). Wait, handleReject in AdminView:
+    // const handleReject = () => { if (selected) { onReject(selected.id); ... } }
+    // So the prop passed to Modal is a function that takes no args.
+    t: TFunction;
+    language: string;
+    viewMode?: 'review' | 'viewOnly';
+}
 
-export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
+// Updating props definition to match AdminView usage
+interface SubmissionDetailModalPropsFixed {
+    isOpen: boolean;
+    onClose: () => void;
+    submission: PropertySubmission;
+    onApprove: (coverImage: string) => void;
+    onReject: () => void;
+    t: TFunction;
+    language: string;
+    viewMode?: 'review' | 'viewOnly';
+}
+
+
+const SubmissionDetailModal = ({
   isOpen,
   onClose,
   submission,
@@ -64,9 +86,9 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
   t,
   language,
   viewMode = 'review',
-}) => {
-  const [selectedCoverImage, setSelectedCoverImage] = useState<string | null>(null);
-  const [error, setError] = useState('');
+}: SubmissionDetailModalPropsFixed) => {
+  const [selectedCoverImage, setSelectedCoverImage] = React.useState<string | null>(null);
+  const [error, setError] = React.useState('');
   
   if (!isOpen) return null;
 
@@ -98,61 +120,61 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
         </div>
         
         <div className="p-6 space-y-6 overflow-y-auto max-h-[65vh]">
-            <DetailSection title={t('owner_information')}>
-                <DetailRow label={t('owner_name')} value={submission.ownerName} />
-                <DetailRow label={t('owner_phone')} value={submission.ownerPhone} />
-            </DetailSection>
+            <DetailSectionModal title={t('owner_information')}>
+                <DetailRowModal label={t('owner_name')} value={submission.ownerName} />
+                <DetailRowModal label={t('owner_phone')} value={submission.ownerPhone} />
+            </DetailSectionModal>
 
-            <DetailSection title={t('general_information')}>
-                <DetailRow label={t('property_type')} value={t(property.type)} />
-                <DetailRow label={t('property_size')} value={`${property.size} m²`} />
-                <DetailRow label={t('property_price')} value={`$${property.price.toLocaleString()}`} />
-                <DetailRow label={t('construction_year')} value={property.constructionYear} />
-                <DetailRow label={t('furnished')} value={property.furnished} />
+            <DetailSectionModal title={t('general_information')}>
+                <DetailRowModal label={t('property_type')} value={t(property.type as any)} />
+                <DetailRowModal label={t('property_size')} value={`${property.size} m²`} />
+                <DetailRowModal label={t('property_price')} value={`$${property.price.toLocaleString()}`} />
+                <DetailRowModal label={t('construction_year')} value={property.constructionYear} />
+                <DetailRowModal label={t('furnished')} value={property.furnished} />
                 
-                {property.bedrooms > 0 && <DetailRow label={t('bedrooms')} value={property.bedrooms} />}
-                {property.bathrooms > 0 && <DetailRow label={t('bathrooms')} value={property.bathrooms} />}
-                {property.livingRooms > 0 && <DetailRow label={t('living_rooms')} value={property.livingRooms} />}
-                {property.kitchens > 0 && <DetailRow label={t('kitchens')} value={property.kitchens} />}
-                {property.balconies > 0 && <DetailRow label={t('balconies')} value={property.balconies} />}
+                {property.bedrooms > 0 && <DetailRowModal label={t('bedrooms')} value={property.bedrooms} />}
+                {property.bathrooms > 0 && <DetailRowModal label={t('bathrooms')} value={property.bathrooms} />}
+                {property.livingRooms > 0 && <DetailRowModal label={t('living_rooms')} value={property.livingRooms} />}
+                {property.kitchens > 0 && <DetailRowModal label={t('kitchens')} value={property.kitchens} />}
+                {property.balconies > 0 && <DetailRowModal label={t('balconies')} value={property.balconies} />}
                
-                {property.totalFloors !== undefined && <DetailRow label={t('total_floors')} value={property.totalFloors} />}
-                {property.floorNumber !== undefined && <DetailRow label={t('floor_number')} value={property.floorNumber} />}
-                {property.elevator !== undefined && <DetailRow label={t('elevator')} value={property.elevator} />}
-            </DetailSection>
+                {property.totalFloors !== undefined && <DetailRowModal label={t('total_floors')} value={property.totalFloors} />}
+                {property.floorNumber !== undefined && <DetailRowModal label={t('floor_number')} value={property.floorNumber} />}
+                {property.elevator !== undefined && <DetailRowModal label={t('elevator')} value={property.elevator} />}
+            </DetailSectionModal>
             
             {property.description && (
-                <DetailSection title={t('description')} gridCols={1}>
+                <DetailSectionModal title={t('description')} gridCols={1}>
                     <p className="text-gray-700 text-sm whitespace-pre-wrap">{property.description}</p>
-                </DetailSection>
+                </DetailSectionModal>
             )}
 
-             <DetailSection title={t('utilities_info')}>
-                <DetailRow label={t('water_source')} value={property.waterSource} />
-                <DetailRow label={t('electricity_source')} value={property.electricitySource.map(s => t(s as any)).join(', ')} />
-                <DetailRow label={t('parking_spaces')} value={property.parking} />
-            </DetailSection>
+             <DetailSectionModal title={t('utilities_info')}>
+                <DetailRowModal label={t('water_source')} value={property.waterSource} />
+                <DetailRowModal label={t('electricity_source')} value={property.electricitySource.map(s => t(s as any)).join(', ')} />
+                <DetailRowModal label={t('parking_spaces')} value={property.parking} />
+            </DetailSectionModal>
 
-            <DetailSection title={t('location_info')} gridCols={1}>
-                <DetailRow label={t('google_maps_link')} value={property.mapsLink} />
-                <DetailRow label={t('full_address')} value={property.fullAddress} />
-            </DetailSection>
+            <DetailSectionModal title={t('location_info')} gridCols={1}>
+                <DetailRowModal label={t('google_maps_link')} value={property.mapsLink} />
+                <DetailRowModal label={t('full_address')} value={property.fullAddress} />
+            </DetailSectionModal>
 
-            <DetailSection title={t('uploaded_documents')} gridCols={1}>
+            <DetailSectionModal title={t('uploaded_documents')} gridCols={1}>
                 {submission.uploadedDocuments.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
                         {submission.uploadedDocuments.map((src, index) => <FilePreview fileSrc={src} index={index} type="doc" t={t} />)}
                     </div>
                 ) : <p className="text-gray-500 text-sm">{t('no_documents_uploaded')}</p>}
-            </DetailSection>
+            </DetailSectionModal>
 
-            <DetailSection title={t('owner_id_card_view')} gridCols={1}>
+            <DetailSectionModal title={t('owner_id_card_view')} gridCols={1}>
                 {submission.uploadedOwnerId.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
                         {submission.uploadedOwnerId.map((src, index) => <FilePreview fileSrc={src} index={index} type="id" t={t} />)}
                     </div>
                 ) : <p className="text-gray-500 text-sm">{t('no_id_uploaded')}</p>}
-            </DetailSection>
+            </DetailSectionModal>
         </div>
 
         {viewMode === 'review' ? (
@@ -211,3 +233,5 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
     </div>
   );
 };
+
+export default SubmissionDetailModal;

@@ -1,6 +1,7 @@
+
 import React from 'react';
 
-export const PdfIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const PdfIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
         fill="none" 
@@ -13,3 +14,5 @@ export const PdfIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v2.25h2.25" />
     </svg>
 );
+
+export default PdfIcon;

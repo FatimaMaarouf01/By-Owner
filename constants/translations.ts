@@ -1,7 +1,5 @@
 
-import { Translations } from '../types';
-
-export const translations: Translations = {
+export const translations = {
   en: {
     all: 'All',
     villas: 'Villas',

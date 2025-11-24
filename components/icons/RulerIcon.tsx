@@ -1,6 +1,7 @@
+
 import React from 'react';
 
-export const RulerIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const RulerIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
         fill="none" 
@@ -12,3 +13,5 @@ export const RulerIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
     </svg>
 );
+
+export default RulerIcon;

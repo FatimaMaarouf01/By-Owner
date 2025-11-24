@@ -1,13 +1,14 @@
 
-import { useState, useCallback } from 'react';
+import React from 'react';
 import { translations } from '../constants/translations';
-import { Language, TranslationKey } from '../types';
+import { TranslationKey } from '../types';
 
-export const useTranslations = () => {
-  const [lang, setLang] = useState<Language>('en');
+const useTranslations = () => {
+  const [lang, setLang] = React.useState<'en' | 'ar'>('en');
 
-  const t = useCallback(
-    (key: TranslationKey): string => {
+  const t = React.useCallback(
+    (key: TranslationKey | string) => {
+      // @ts-ignore
       return translations[lang][key] || key;
     },
     [lang]
@@ -15,3 +16,5 @@ export const useTranslations = () => {
 
   return { t, setLang, lang };
 };
+
+export { useTranslations };

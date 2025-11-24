@@ -1,21 +1,11 @@
 
-import React, { useState } from 'react';
-import { TFunction, Language, PropertyCategory, TranslationKey } from '../types';
-import { LanguageIcon } from './icons/LanguageIcon';
-import { BurgerIcon } from './icons/BurgerIcon';
-import { CloseIcon } from './icons/CloseIcon';
+import React from 'react';
+import LanguageIcon from './icons/LanguageIcon';
+import CloseIcon from './icons/CloseIcon';
+import BurgerIcon from './icons/BurgerIcon';
+import { PropertyCategory, TFunction } from '../types';
 
-interface HeaderProps {
-  language: Language;
-  onLanguageToggle: () => void;
-  t: TFunction;
-  onShowForm: () => void;
-  onShowHome: () => void;
-  activeCategory: PropertyCategory;
-  onSelectCategory: (category: PropertyCategory) => void;
-}
-
-const Logo: React.FC<React.SVGProps<SVGSVGElement> & { language: Language }> = ({ language, ...props }) => {
+const Logo = ({ language, ...props }: { language: string } & React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="155" height="42" viewBox="0 0 155 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ direction: 'ltr' }} {...props}>
       <g className="text-brand-secondary" transform="translate(0, 0)">
@@ -30,8 +20,17 @@ const Logo: React.FC<React.SVGProps<SVGSVGElement> & { language: Language }> = (
   );
 };
 
+interface HeaderProps {
+    language: 'en' | 'ar';
+    onLanguageToggle: () => void;
+    t: TFunction;
+    onShowForm: () => void;
+    onShowHome: () => void;
+    activeCategory: PropertyCategory;
+    onSelectCategory: (category: PropertyCategory) => void;
+}
 
-export const Header: React.FC<HeaderProps> = ({
+const Header = ({
   language,
   onLanguageToggle,
   t,
@@ -39,10 +38,10 @@ export const Header: React.FC<HeaderProps> = ({
   onShowHome,
   activeCategory,
   onSelectCategory,
-}) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+}: HeaderProps) => {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const navLinks: { labelKey: TranslationKey; category: PropertyCategory }[] = [
+  const navLinks: { labelKey: string, category: PropertyCategory }[] = [
     { labelKey: 'all', category: 'all' },
     { labelKey: 'villas', category: 'villa' },
     { labelKey: 'apartments', category: 'apartment' },
@@ -86,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
                     : 'text-gray-600 hover:text-brand-secondary'
                 }`}
               >
-                {t(labelKey)}
+                {t(labelKey as any)}
               </button>
             ))}
           </nav>
@@ -128,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                {t(labelKey)}
+                {t(labelKey as any)}
               </button>
             ))}
             <button
@@ -142,3 +141,5 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+
+export default Header;

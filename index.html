@@ -9,6 +9,8 @@
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <link rel="apple-touch-icon" href="./icon.svg" />
     <link rel="manifest" href="./manifest.json" />
+    
+    <!-- 1. Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -27,24 +29,74 @@
         }
       }
     </script>
+
+    <!-- 2. Load Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-<script type="importmap">
+
+    <!-- 3. Load React & ReactDOM (UMD for global access) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- 4. Load Babel Standalone for in-browser transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "vite": "https://aistudiocdn.com/vite@^7.2.4",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
   }
 }
 </script>
 </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <div id="root">
+        <!-- Fallback loading state -->
+        <div style="height: 100vh; display: flex; justify-content: center; align-items: center; color: #008C8C; font-family: sans-serif;">
+            Loading application...
+        </div>
+    </div>
+
+    <!-- 5. Load Application Scripts in Dependency Order -->
+    <!-- Type: text/babel tells Babel to compile these on the fly -->
+    
+    <!-- Helpers & Constants -->
+    <script type="text/babel" src="./types.ts"></script>
+    <script type="text/babel" src="./constants/translations.ts"></script>
+    <script type="text/babel" src="./constants/mockData.ts"></script>
+    <script type="text/babel" src="./hooks/useTranslations.ts"></script>
+
+    <!-- Icons -->
+    <script type="text/babel" src="./components/icons/LanguageIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/BurgerIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/CloseIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/UploadIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/SearchIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/BedIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/BathIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/RulerIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/ParkingIcon.tsx"></script>
+    <script type="text/babel" src="./components/icons/PdfIcon.tsx"></script>
+
+    <!-- Components -->
+    <script type="text/babel" src="./components/Header.tsx"></script>
+    <script type="text/babel" src="./components/Footer.tsx"></script>
+    <script type="text/babel" src="./components/HeroSlider.tsx"></script>
+    <script type="text/babel" src="./components/SubmissionSuccessModal.tsx"></script>
+    <script type="text/babel" src="./components/SubmissionDetailModal.tsx"></script>
+    <script type="text/babel" src="./components/PropertyForm.tsx"></script>
+    <script type="text/babel" src="./components/AdminView.tsx"></script>
+    <script type="text/babel" src="./components/PropertyDetailView.tsx"></script>
+    <script type="text/babel" src="./components/FilterBar.tsx"></script>
+
+    <!-- Main App -->
+    <script type="text/babel" src="./App.tsx"></script>
+    
+    <!-- Entry Point -->
+    <script type="text/babel" src="./index.tsx"></script>
   </body>
 </html>

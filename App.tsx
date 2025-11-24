@@ -1,28 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Header } from './components/Header';
-import { HeroSlider } from './components/HeroSlider';
-import { PropertyForm } from './components/PropertyForm';
-import { Footer } from './components/Footer';
-import { SubmissionSuccessModal } from './components/SubmissionSuccessModal';
+
+import React from 'react';
 import { useTranslations } from './hooks/useTranslations';
-import { Language, PropertyCategory, PropertySubmission, Property, FilterState } from './types';
+import Header from './components/Header';
+import HeroSlider from './components/HeroSlider';
+import FilterBar, { initialFilterState } from './components/FilterBar';
+import PropertyForm from './components/PropertyForm';
+import AdminView from './components/AdminView';
+import PropertyDetailView from './components/PropertyDetailView';
+import Footer from './components/Footer';
+import SubmissionSuccessModal from './components/SubmissionSuccessModal';
 import { MOCK_PROPERTIES } from './constants/mockData';
-import { AdminView } from './components/AdminView';
-import { PropertyDetailView } from './components/PropertyDetailView';
-import { FilterBar, initialFilterState } from './components/FilterBar';
+import { Property, PropertySubmission, PropertyCategory, FilterState } from './types';
 
-const App: React.FC = () => {
-  const [language, setLanguage] = useState<Language>('en');
+const App = () => {
+  const [language, setLanguage] = React.useState<'en' | 'ar'>('en');
   const { t, setLang } = useTranslations();
-  const [currentView, setCurrentView] = useState<'home' | 'form' | 'admin' | 'detail'>('home');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<PropertyCategory>('all');
-  const [submissions, setSubmissions] = useState<PropertySubmission[]>([]);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [activeFilters, setActiveFilters] = useState<FilterState>(initialFilterState);
-  const [mockProperties, setMockProperties] = useState<Property[]>(MOCK_PROPERTIES);
+  const [currentView, setCurrentView] = React.useState('home');
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [activeCategory, setActiveCategory] = React.useState<PropertyCategory>('all');
+  const [submissions, setSubmissions] = React.useState<PropertySubmission[]>([]);
+  const [selectedProperty, setSelectedProperty] = React.useState<Property | null>(null);
+  const [activeFilters, setActiveFilters] = React.useState<FilterState>(initialFilterState);
+  const [mockProperties, setMockProperties] = React.useState<Property[]>(MOCK_PROPERTIES as any); // Cast for mock compatibility if types differ slightly
 
-  useEffect(() => {
+  React.useEffect(() => {
     setLang(language);
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
@@ -30,7 +31,7 @@ const App: React.FC = () => {
     document.body.style.fontFamily = bodyFont;
   }, [language, setLang]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       const storedSubmissions = localStorage.getItem('propertySubmissions');
       if (storedSubmissions) {
@@ -41,7 +42,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem('propertySubmissions', JSON.stringify(submissions));
   }, [submissions]);
 
@@ -100,7 +101,7 @@ const App: React.FC = () => {
     setActiveFilters(initialFilterState);
   };
 
-  const PageTitle: React.FC<{title: string; subtitle: string}> = ({title, subtitle}) => (
+  const PageTitle = ({title, subtitle}: {title: string, subtitle: string}) => (
     <div className="text-center my-8 md:my-12">
         <h2 className="text-3xl md:text-4xl font-bold text-brand-primary">{title}</h2>
         <p className="text-lg text-gray-600 mt-2">{subtitle}</p>
@@ -167,9 +168,9 @@ const App: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
                 {filteredProperties.slice(0, 6).map((prop) => (
                   <div key={prop.id} onClick={() => handleShowPropertyDetail(prop)} className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
-                    <img src={prop.coverImage} alt={t(prop.type)} className="w-full h-56 object-cover"/>
+                    <img src={prop.coverImage} alt={t(prop.type as any)} className="w-full h-56 object-cover"/>
                     <div className="p-6">
-                      <span className="inline-block bg-brand-secondary text-white text-sm font-semibold px-3 py-1 rounded-full mb-3">{t(prop.type)}</span>
+                      <span className="inline-block bg-brand-secondary text-white text-sm font-semibold px-3 py-1 rounded-full mb-3">{t(prop.type as any)}</span>
                       <h3 className="text-xl font-bold text-brand-primary mb-2">{prop.address[language] || prop.address['en']}</h3>
                       <p className="text-2xl font-bold text-brand-secondary">{`$${prop.price.toLocaleString()}`}</p>
                     </div>

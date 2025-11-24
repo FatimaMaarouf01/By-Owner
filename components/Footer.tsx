@@ -3,11 +3,11 @@ import React from 'react';
 import { TFunction } from '../types';
 
 interface FooterProps {
-  t: TFunction;
-  onShowAdmin: () => void;
+    t: TFunction;
+    onShowAdmin: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ t, onShowAdmin }) => {
+const Footer = ({ t, onShowAdmin }: FooterProps) => {
   return (
     <footer className="bg-brand-dark text-white mt-auto">
       <div className="container mx-auto py-6 px-4 text-center">
@@ -22,3 +22,5 @@ export const Footer: React.FC<FooterProps> = ({ t, onShowAdmin }) => {
     </footer>
   );
 };
+
+export default Footer;

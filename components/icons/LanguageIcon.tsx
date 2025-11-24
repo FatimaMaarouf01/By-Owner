@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-export const LanguageIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const LanguageIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="h-6 w-6"
@@ -18,3 +18,5 @@ export const LanguageIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
     />
   </svg>
 );
+
+export default LanguageIcon;

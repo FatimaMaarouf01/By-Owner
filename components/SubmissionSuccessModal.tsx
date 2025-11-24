@@ -8,11 +8,11 @@ interface SubmissionSuccessModalProps {
   t: TFunction;
 }
 
-export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
+const SubmissionSuccessModal = ({
   isOpen,
   onClose,
   t,
-}) => {
+}: SubmissionSuccessModalProps) => {
   if (!isOpen) return null;
 
   return (
@@ -43,3 +43,5 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
     </div>
   );
 };
+
+export default SubmissionSuccessModal;

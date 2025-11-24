@@ -1,6 +1,4 @@
 
-import { translations } from "./constants/translations";
-
 export type Language = 'en' | 'ar';
 
 export type PropertyType = 'villa' | 'apartment' | 'commercial' | 'land';
@@ -12,10 +10,10 @@ export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
 export interface Property {
   id: number;
   type: PropertyType;
-  coverImage: string; // Will be represented by a data URL from the uploaded file
+  coverImage: string;
   address: {
-    en: string; // Will use the fullAddress form field
-    ar:string; // Will use the fullAddress form field, can be enhanced later
+    en: string;
+    ar:string;
   };
   price: number;
   size: number;
@@ -58,7 +56,6 @@ export interface FilterState {
   minSize: string;
   maxSize: string;
 }
-
 
 export type TranslationKey = 
   | 'all'
@@ -122,7 +119,6 @@ export type TranslationKey =
   | 'property_price'
   | 'property_price_placeholder'
   | 'parking_spaces'
-  // FIX: Added missing translation key
   | 'parking_spaces_placeholder'
   | 'submit_listing'
   | 'submission_successful'
@@ -186,4 +182,4 @@ export type Translations = {
   };
 };
 
-export type TFunction = (key: TranslationKey) => string;
+export type TFunction = (key: TranslationKey | string) => string;

@@ -1,25 +1,24 @@
-import React from 'react';
-import { Property, TFunction, Language } from '../types';
-import { RulerIcon } from './icons/RulerIcon';
-import { BedIcon } from './icons/BedIcon';
-import { BathIcon } from './icons/BathIcon';
-import { ParkingIcon } from './icons/ParkingIcon';
 
-interface PropertyDetailViewProps {
-  property: Property;
-  t: TFunction;
-  onBack: () => void;
-  language: Language;
+import React from 'react';
+import RulerIcon from './icons/RulerIcon';
+import BedIcon from './icons/BedIcon';
+import BathIcon from './icons/BathIcon';
+import ParkingIcon from './icons/ParkingIcon';
+import { Property, TFunction } from '../types';
+
+interface DetailSectionProps {
+    title: string;
+    children: React.ReactNode;
 }
 
-const DetailSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+const DetailSection = ({ title, children }: DetailSectionProps) => (
   <div className="bg-white p-6 rounded-lg shadow-md">
     <h3 className="text-xl font-bold text-brand-primary mb-4 border-b pb-2">{title}</h3>
     <div className="space-y-3">{children}</div>
   </div>
 );
 
-const KeyDetailItem: React.FC<{ icon: React.ReactNode; value: string | number; label: string }> = ({ icon, value, label }) => (
+const KeyDetailItem = ({ icon, value, label }: any) => (
   <div className="flex flex-col items-center text-center p-4 bg-brand-light rounded-lg">
     <div className="text-brand-primary mb-2">{icon}</div>
     <span className="text-lg font-bold text-brand-dark">{value}</span>
@@ -27,12 +26,18 @@ const KeyDetailItem: React.FC<{ icon: React.ReactNode; value: string | number; l
   </div>
 );
 
-export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, t, onBack, language }) => {
-  // FIX: Moved DetailRow inside the component so it has access to the `t` function for translation.
-  const DetailRow: React.FC<{ label: string; value: string | number | undefined | string[] }> = ({ label, value }) => (
+interface PropertyDetailViewProps {
+    property: Property;
+    t: TFunction;
+    onBack: () => void;
+    language: string;
+}
+
+const PropertyDetailView = ({ property, t, onBack, language }: PropertyDetailViewProps) => {
+  const DetailRow = ({ label, value }: { label: string, value: any }) => (
     <div className="flex justify-between text-gray-700">
       <span className="font-medium">{label}:</span>
-      <span className="text-gray-900">{Array.isArray(value) ? value.map(v => t(v as any)).join(', ') : value ?? 'N/A'}</span>
+      <span className="text-gray-900">{Array.isArray(value) ? value.map(v => t(v)).join(', ') : value ?? 'N/A'}</span>
     </div>
   );
 
@@ -53,7 +58,7 @@ export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property
                     {/* Left/Main Column */}
                     <div className="lg:col-span-2 space-y-8">
                         <div className="overflow-hidden rounded-lg shadow-lg">
-                            <img src={property.coverImage} alt={t(property.type)} className="w-full h-auto max-h-[500px] object-cover"/>
+                            <img src={property.coverImage} alt={t(property.type as any)} className="w-full h-auto max-h-[500px] object-cover"/>
                         </div>
                         
                         <DetailSection title={t('key_details')}>
@@ -92,7 +97,7 @@ export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property
                     {/* Right/Sidebar Column */}
                     <aside className="lg:col-span-1 mt-8 lg:mt-0 lg:sticky top-24 self-start">
                        <div className="bg-white p-6 rounded-lg shadow-lg space-y-4">
-                           <span className="inline-block bg-brand-secondary text-white text-sm font-semibold px-3 py-1 rounded-full mb-2 capitalize">{t(property.type)}</span>
+                           <span className="inline-block bg-brand-secondary text-white text-sm font-semibold px-3 py-1 rounded-full mb-2 capitalize">{t(property.type as any)}</span>
                            <h1 className="text-2xl font-bold text-brand-primary">{property.address[language] || property.address['en']}</h1>
                            <p className="text-4xl font-extrabold text-brand-dark">{`$${property.price.toLocaleString()}`}</p>
                            <a 
@@ -111,3 +116,5 @@ export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property
     </div>
   );
 };
+
+export default PropertyDetailView;

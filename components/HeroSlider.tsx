@@ -1,20 +1,20 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { Property, TFunction } from '../types';
 
 interface HeroSliderProps {
-  properties: Property[];
-  t: TFunction;
+    properties: Property[];
+    t: TFunction;
 }
 
-export const HeroSlider: React.FC<HeroSliderProps> = ({ properties, t }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+const HeroSlider = ({ properties, t }: HeroSliderProps) => {
+  const [currentIndex, setCurrentIndex] = React.useState(0);
 
-  const nextSlide = useCallback(() => {
+  const nextSlide = React.useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % properties.length);
   }, [properties.length]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
   }, [nextSlide]);
@@ -36,7 +36,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ properties, t }) => {
         >
           <img
             src={property.coverImage}
-            alt={t(property.type)}
+            alt={t(property.type as any)}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -45,7 +45,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ properties, t }) => {
       
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center p-4">
         <h2 className="text-4xl md:text-6xl font-bold drop-shadow-lg mb-4 animate-fade-in-down">
-          {t(currentProperty.type)}
+          {t(currentProperty.type as any)}
         </h2>
         <p className="text-xl md:text-2xl drop-shadow-lg animate-fade-in-up">
           {currentProperty.address.en}
@@ -67,3 +67,5 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ properties, t }) => {
     </div>
   );
 };
+
+export default HeroSlider;

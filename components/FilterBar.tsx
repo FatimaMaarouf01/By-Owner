@@ -1,12 +1,7 @@
-import React, { useState } from 'react';
-import { TFunction, FilterState } from '../types';
-import { SearchIcon } from './icons/SearchIcon';
 
-interface FilterBarProps {
-  onApply: (filters: FilterState) => void;
-  onReset: () => void;
-  t: TFunction;
-}
+import React from 'react';
+import SearchIcon from './icons/SearchIcon';
+import { FilterState, TFunction } from '../types';
 
 export const initialFilterState: FilterState = {
     location: '',
@@ -17,15 +12,21 @@ export const initialFilterState: FilterState = {
     maxSize: '',
 };
 
-const FilterInput: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+const FilterInput = ({ label, children }: { label: string, children: React.ReactNode }) => (
     <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
         {children}
     </div>
 );
 
-export const FilterBar: React.FC<FilterBarProps> = ({ onApply, onReset, t }) => {
-    const [filters, setFilters] = useState<FilterState>(initialFilterState);
+interface FilterBarProps {
+    onApply: (filters: FilterState) => void;
+    onReset: () => void;
+    t: TFunction;
+}
+
+const FilterBar = ({ onApply, onReset, t }: FilterBarProps) => {
+    const [filters, setFilters] = React.useState<FilterState>(initialFilterState);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFilters(prev => ({...prev, [e.target.name]: e.target.value}));
@@ -140,3 +141,5 @@ export const FilterBar: React.FC<FilterBarProps> = ({ onApply, onReset, t }) => 
         </div>
     );
 };
+
+export default FilterBar;

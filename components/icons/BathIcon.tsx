@@ -1,6 +1,7 @@
+
 import React from 'react';
 
-export const BathIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const BathIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
         fill="none" 
@@ -14,3 +15,5 @@ export const BathIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.243 16.243l-1.06-1.06-4.173 4.173 1.06 1.06a4.5 4.5 0 006.173-6.173z" />
     </svg>
 );
+
+export default BathIcon;
