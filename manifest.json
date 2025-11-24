@@ -1,0 +1,15 @@
+{
+  "short_name": "By Owner",
+  "name": "By Owner - Property Submission Plus",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#008C8C",
+  "background_color": "#F5F4F0"
+}
