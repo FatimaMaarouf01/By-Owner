@@ -1,11 +1,10 @@
-
 import React from 'react';
 import PdfIcon from './icons/PdfIcon';
 import { PropertySubmission, TFunction } from '../types';
 
 interface DetailSectionModalProps {
     title: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
     gridCols?: number;
 }
 
@@ -50,21 +49,6 @@ const FilePreview = ({ fileSrc, index, type, t }: any) => {
     );
 };
 
-interface SubmissionDetailModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    submission: PropertySubmission;
-    onApprove: (coverImage: string) => void;
-    onReject: (id: number) => void; // Fixed signature to match usage in AdminView (Wait, AdminView passes handleReject which takes no args, but here it is passed as onReject. Actually handleReject in AdminView takes no args but uses selectedPendingSubmission state. Here it's passed as onClick={onReject}. Wait, onReject prop expects? AdminView passes `handleReject`. `handleReject` is `() => void`. So prop should be `() => void`. )
-    // Correction: In AdminView handleReject calls onReject(id). Wait, handleReject in AdminView:
-    // const handleReject = () => { if (selected) { onReject(selected.id); ... } }
-    // So the prop passed to Modal is a function that takes no args.
-    t: TFunction;
-    language: string;
-    viewMode?: 'review' | 'viewOnly';
-}
-
-// Updating props definition to match AdminView usage
 interface SubmissionDetailModalPropsFixed {
     isOpen: boolean;
     onClose: () => void;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import RulerIcon from './icons/RulerIcon';
 import BedIcon from './icons/BedIcon';
@@ -8,7 +7,7 @@ import { Property, TFunction } from '../types';
 
 interface DetailSectionProps {
     title: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 const DetailSection = ({ title, children }: DetailSectionProps) => (

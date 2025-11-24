@@ -1,4 +1,3 @@
-
 import React from 'react';
 import SearchIcon from './icons/SearchIcon';
 import { FilterState, TFunction } from '../types';
@@ -12,7 +11,7 @@ export const initialFilterState: FilterState = {
     maxSize: '',
 };
 
-const FilterInput = ({ label, children }: { label: string, children: React.ReactNode }) => (
+const FilterInput = ({ label, children }: { label: string, children?: React.ReactNode }) => (
     <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
         {children}

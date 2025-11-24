@@ -2,418 +2,1964 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <meta
-      name="description"
-      content="A platform for property owners to directly submit their listings for review and publication on El Marakibji Properties."
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A platform for property owners to directly submit their listings for review and publication on El Marakibji Properties." />
     <meta name="theme-color" content="#008C8C" />
     <title>By Owner</title>
-
-    <!-- Icons / PWA bits (keep your existing files in repo) -->
-    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
-    <link rel="apple-touch-icon" href="./icon.svg" />
-    <link rel="manifest" href="./manifest.json" />
-
-    <!-- Tailwind CDN -->
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    
+    <!-- 1. Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              "brand-primary": "#212121",
-              "brand-secondary": "#008C8C",
-              "brand-light": "#F5F4F0",
-              "brand-dark": "#006666",
+              'brand-primary': '#212121',
+              'brand-secondary': '#008C8C',
+              'brand-light': '#F5F4F0',
+              'brand-dark': '#006666',
             },
             fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
+                sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
     </script>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      rel="preconnect"
-      href="https://fonts.gstatic.com"
-      crossorigin
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;500;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <!-- 2. Load Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
 
-    <!-- React & ReactDOM UMD -->
-    <script
-      crossorigin
-      src="https://unpkg.com/react@18/umd/react.production.min.js"
-    ></script>
-    <script
-      crossorigin
-      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
-    ></script>
+    <!-- 3. Load React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- Babel for JSX in the browser -->
+    <!-- 4. Load Babel Standalone -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  </head>
-
-  <body class="bg-brand-light font-sans">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-
     <div id="root">
-      <!-- Fallback loading state -->
-      <div
-        style="
-          height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          color: #008c8c;
-          font-family: sans-serif;
-        "
-      >
-        Loading application...
-      </div>
+        <!-- Fallback loading state -->
+        <div style="height: 100vh; display: flex; justify-content: center; align-items: center; color: #008C8C; font-family: sans-serif;">
+            Loading application...
+        </div>
     </div>
 
-    <!-- Our whole app lives here -->
+    <!-- Main Application Script -->
     <script type="text/babel" data-presets="env,react">
-      const { useState } = React;
+      const { useState, useEffect, useCallback, useMemo } = React;
 
-      function App() {
-        const [submissions, setSubmissions] = useState([]);
-        const [form, setForm] = useState({
-          ownerName: "",
-          phone: "",
-          propertyType: "",
-          location: "",
-          price: "",
-          bedrooms: "",
-          bathrooms: "",
-          notes: "",
-        });
+      // --- CONSTANTS ---
 
-        const handleChange = (e) => {
-          const { name, value } = e.target;
-          setForm((prev) => ({ ...prev, [name]: value }));
-        };
+      const translations = {
+        en: {
+          all: 'All',
+          villas: 'Villas',
+          apartments: 'Apartments',
+          commercial: 'Commercial',
+          land: 'Land',
+          submit_your_property: 'Submit Your Property',
+          featured_properties: 'Featured Properties',
+          explore_our_exclusive_listings: 'Explore our exclusive selection of listings',
+          list_your_property: 'List Your Property With Us',
+          by_owner_submission_form_subtitle: 'Fill out the details below to get your property listed.',
+          owner_information: 'Owner Information',
+          owner_name: 'Owner Name',
+          owner_name_placeholder: 'e.g., John Doe',
+          owner_phone: 'Phone Number',
+          owner_phone_placeholder: 'e.g., +961 03 123 456',
+          property_details: 'Property Details',
+          property_type: 'Property Type',
+          select_property_type: 'Select a type',
+          property_size: 'Property Size (m²)',
+          property_size_placeholder: 'e.g., 150',
+          bedrooms: 'Bedrooms',
+          living_rooms: 'Living Rooms',
+          balconies: 'Balconies',
+          kitchens: 'Kitchens',
+          bathrooms: 'Bathrooms',
+          furnished: 'Furnished',
+          yes: 'Yes',
+          no: 'No',
+          total_floors: 'Total Floors in Building',
+          total_floors_placeholder: 'e.g., 8',
+          floor_number: 'Floor Number',
+          floor_number_placeholder: 'e.g., 5',
+          elevator: 'Elevator Available',
+          construction_year: 'Construction Year',
+          construction_year_placeholder: 'e.g., 2020',
+          utilities: 'Utilities',
+          water_source: 'Water Source',
+          water_source_placeholder: 'e.g., Well, Municipal',
+          electricity_source: 'Electricity Source',
+          select_electricity_source: 'Select a source',
+          solar: 'Solar Power',
+          building_generator: 'Building Generator',
+          other: 'Other',
+          location: 'Location',
+          google_maps_link: 'Google Maps Link',
+          google_maps_link_placeholder: 'Paste the link here',
+          pick_on_map: 'Pick on Map',
+          pick_on_map_tooltip: 'This feature requires API integration.',
+          full_address: 'Full Address',
+          full_address_placeholder: 'Enter the detailed address',
+          uploads: 'Uploads',
+          property_images: 'Property Images',
+          property_images_hint: 'Upload landscape photos. First image will be the cover.',
+          official_documents: 'Official Documents',
+          official_documents_hint: 'Images or PDF format.',
+          owner_id: 'Owner ID Card',
+          owner_id_hint: 'Upload a clear image of the ID card.',
+          pricing: 'Pricing',
+          property_price: 'Property Price (USD)',
+          property_price_placeholder: 'e.g., 250000',
+          parking_spaces: 'Available Parking Spaces',
+          parking_spaces_placeholder: 'e.g., 2',
+          submit_listing: 'Submit Listing for Review',
+          submission_successful: 'Submission Successful!',
+          submission_disclaimer: 'Thank you for submitting your property. Our team will review the details and contact you for further procedures. This may take up to 48 hours.',
+          close: 'Close',
+          field_required: 'This field is required',
+          footer_text: '© 2024 El Marakibji Properties.',
+          villa: 'Villa',
+          apartment: 'Apartment',
+          drag_drop_files: 'Drag & drop files here',
+          or_click_to_select: 'or click to select files',
+          admin_panel: 'Admin Panel',
+          pending_submissions: 'Pending Submissions',
+          no_pending_submissions: 'There are no pending submissions to review.',
+          approve: 'Approve',
+          reject: 'Reject',
+          admin: 'Admin',
+          search_by_location: 'Search by location...',
+          back_to_listings: 'Back to Listings',
+          key_details: 'Key Details',
+          general_information: 'General Information',
+          utilities_info: 'Utilities',
+          location_info: 'Location',
+          view_on_map: 'View on Map',
+          parking: 'Parking',
+          min_price: 'Min Price',
+          max_price: 'Max Price',
+          min_size: 'Min Size (m²)',
+          max_size: 'Max Size (m²)',
+          price_range: 'Price Range ($)',
+          size_range: 'Size Range (m²)',
+          apply_filters: 'Apply Filters',
+          reset_filters: 'Reset',
+          any: 'Any',
+          view_details: 'View Details',
+          approved_submissions: 'Approved Submissions',
+          remove: 'Remove',
+          no_approved_submissions: 'There are no approved properties.',
+          remove_property_confirm: 'Are you sure you want to remove this property?',
+          published_properties: 'Published Properties',
+          no_published_properties: 'There are no published properties on the site.',
+          choose_cover_image: 'Choose a cover image from the uploads below.',
+          powered_by: 'Powered by FMtech',
+          description: 'Description (Optional)',
+          description_placeholder: 'Provide a brief description of the property...',
+          uploaded_documents: 'Uploaded Documents',
+          owner_id_card_view: "Owner's ID Card",
+          view: 'View',
+          no_documents_uploaded: 'No documents were uploaded.',
+          no_id_uploaded: "Owner's ID was not uploaded.",
+          admin_login: 'Admin Login',
+          username: 'Username',
+          password: 'Password',
+          login: 'Login',
+          invalid_credentials: 'Invalid username or password',
+        },
+        ar: {
+          all: 'الكل',
+          villas: 'فلل',
+          apartments: 'شقق',
+          commercial: 'تجاري',
+          land: 'أرض',
+          submit_your_property: 'أضف عقارك',
+          featured_properties: 'عقارات مميزة',
+          explore_our_exclusive_listings: 'اكتشف مجموعتنا الحصرية من العقارات',
+          list_your_property: 'أدرج عقارك معنا',
+          by_owner_submission_form_subtitle: 'املأ التفاصيل أدناه لإدراج عقارك.',
+          owner_information: 'معلومات المالك',
+          owner_name: 'اسم المالك',
+          owner_name_placeholder: 'مثال: جون دو',
+          owner_phone: 'رقم الهاتف',
+          owner_phone_placeholder: 'مثال: +961 03 123 456',
+          property_details: 'تفاصيل العقار',
+          property_type: 'نوع العقار',
+          select_property_type: 'اختر نوع العقار',
+          property_size: 'مساحة العقار (م²)',
+          property_size_placeholder: 'مثال: 150',
+          bedrooms: 'غرف نوم',
+          living_rooms: 'غرف معيشة',
+          balconies: 'شرفات',
+          kitchens: 'مطابخ',
+          bathrooms: 'حمامات',
+          furnished: 'مفروش',
+          yes: 'نعم',
+          no: 'لا',
+          total_floors: 'إجمالي طوابق المبنى',
+          total_floors_placeholder: 'مثال: 8',
+          floor_number: 'رقم الطابق',
+          floor_number_placeholder: 'مثال: 5',
+          elevator: 'مصعد متوفر',
+          construction_year: 'سنة البناء',
+          construction_year_placeholder: 'مثال: 2020',
+          utilities: 'الخدمات',
+          water_source: 'مصدر المياه',
+          water_source_placeholder: 'مثال: بئر، بلدية',
+          electricity_source: 'مصدر الكهرباء',
+          select_electricity_source: 'اختر المصدر',
+          solar: 'طاقة شمسية',
+          building_generator: 'مولد المبنى',
+          other: 'آخر',
+          location: 'الموقع',
+          google_maps_link: 'رابط خرائط جوجل',
+          google_maps_link_placeholder: 'الصق الرابط هنا',
+          pick_on_map: 'اختر على الخريطة',
+          pick_on_map_tooltip: 'هذه الميزة تتطلب تكامل واجهة برمجة التطبيقات.',
+          full_address: 'العنوان الكامل',
+          full_address_placeholder: 'أدخل العنوان التفصيلي',
+          uploads: 'الملفات المرفقة',
+          property_images: 'صور العقار',
+          property_images_hint: 'قم بتحميل صور أفقية. الصورة الأولى ستكون صورة الغلاف.',
+          official_documents: 'المستندات الرسمية',
+          official_documents_hint: 'صور أو ملفات PDF.',
+          owner_id: 'بطاقة هوية المالك',
+          owner_id_hint: 'قم بتحميل صورة واضحة لبطاقة الهوية.',
+          pricing: 'التسعير',
+          property_price: 'سعر العقار (دولار أمريكي)',
+          property_price_placeholder: 'مثال: 250000',
+          parking_spaces: 'مواقف سيارات متاحة',
+          parking_spaces_placeholder: 'مثال: 2',
+          submit_listing: 'إرسال العقار للمراجعة',
+          submission_successful: 'تم الإرسال بنجاح!',
+          submission_disclaimer: 'شكرًا لك على إرسال عقارك. سيقوم فريقنا بمراجعة التفاصيل والتواصل معك لاتخاذ الإجراءات اللازمة. قد يستغرق هذا الأمر ما يصل إلى 48 ساعة.',
+          close: 'إغلاق',
+          field_required: 'هذا الحقل مطلوب',
+          footer_text: '© 2024 المراكبجي العقارية.',
+          villa: 'فيلا',
+          apartment: 'شقة',
+          drag_drop_files: 'اسحب وأفلت الملفات هنا',
+          or_click_to_select: 'أو انقر لاختيار الملفات',
+          admin_panel: 'لوحة التحكم',
+          pending_submissions: 'الطلبات المعلقة',
+          no_pending_submissions: 'لا توجد طلبات معلقة للمراجعة.',
+          approve: 'موافقة',
+          reject: 'رفض',
+          admin: 'الإدارة',
+          search_by_location: 'ابحث حسب الموقع...',
+          back_to_listings: 'العودة إلى القائمة',
+          key_details: 'التفاصيل الرئيسية',
+          general_information: 'معلومات عامة',
+          utilities_info: 'الخدمات',
+          location_info: 'الموقع',
+          view_on_map: 'عرض على الخريطة',
+          parking: 'مواقف',
+          min_price: 'السعر الأدنى',
+          max_price: 'السعر الأعلى',
+          min_size: 'المساحة الأدنى (م²)',
+          max_size: 'المساحة الأقصى (م²)',
+          price_range: 'نطاق السعر ($)',
+          size_range: 'نطاق المساحة (م²)',
+          apply_filters: 'تطبيق الفلاتر',
+          reset_filters: 'إعادة تعيين',
+          any: 'أي',
+          view_details: 'عرض التفاصيل',
+          approved_submissions: 'العقارات المعتمدة',
+          remove: 'إزالة',
+          no_approved_submissions: 'لا توجد عقارات معتمدة.',
+          remove_property_confirm: 'هل أنت متأكد من رغبتك في إزالة هذا العقار؟',
+          published_properties: 'العقارات المنشورة',
+          no_published_properties: 'لا توجد عقارات منشورة على الموقع.',
+          choose_cover_image: 'اختر صورة غلاف من الملفات المرفقة أدناه.',
+          powered_by: 'Powered by FMtech',
+          description: 'الوصف (اختياري)',
+          description_placeholder: 'اكتب وصفاً موجزاً للعقار...',
+          uploaded_documents: 'المستندات المرفوعة',
+          owner_id_card_view: 'بطاقة هوية المالك',
+          view: 'عرض',
+          no_documents_uploaded: 'لم يتم رفع أي مستندات.',
+          no_id_uploaded: 'لم يتم رفع بطاقة هوية المالك.',
+          admin_login: 'تسجيل دخول المسؤول',
+          username: 'اسم المستخدم',
+          password: 'كلمة المرور',
+          login: 'تسجيل الدخول',
+          invalid_credentials: 'اسم المستخدم أو كلمة المرور غير صحيحة',
+        },
+      };
 
-        const handleSubmit = (e) => {
-          e.preventDefault();
-          if (!form.ownerName || !form.phone || !form.location) {
-            alert("Please fill at least name, phone, and location.");
-            return;
-          }
-          setSubmissions((prev) => [
-            {
-              id: Date.now(),
-              ...form,
-            },
-            ...prev,
-          ]);
-          setForm({
-            ownerName: "",
-            phone: "",
-            propertyType: "",
-            location: "",
-            price: "",
-            bedrooms: "",
-            bathrooms: "",
-            notes: "",
-          });
-          alert(
-            "Your property has been submitted successfully. Our team will review it shortly."
-          );
-        };
+      const MOCK_PROPERTIES = [
+        {
+          id: 1,
+          type: 'villa',
+          coverImage: 'https://picsum.photos/seed/villa1/800/600',
+          address: {
+            en: 'Modern Villa in the Hills',
+            ar: 'فيلا حديثة في التلال',
+          },
+          price: 1200000,
+          size: 450,
+          bedrooms: 5,
+          livingRooms: 2,
+          balconies: 3,
+          kitchens: 1,
+          bathrooms: 4,
+          furnished: true,
+          constructionYear: 2022,
+          waterSource: 'Well',
+          electricitySource: ['Solar'],
+          mapsLink: 'https://goo.gl/maps/1',
+          parking: 3,
+          totalFloors: 2,
+          elevator: false,
+          description: 'A stunning modern villa with panoramic views of the city. Features a private pool, garden, and state-of-the-art security system.'
+        },
+        {
+          id: 2,
+          type: 'apartment',
+          coverImage: 'https://picsum.photos/seed/apt1/800/600',
+          address: {
+            en: 'Chic Downtown Apartment',
+            ar: 'شقة أنيقة في وسط المدينة',
+          },
+          price: 450000,
+          size: 180,
+          bedrooms: 3,
+          livingRooms: 1,
+          balconies: 2,
+          kitchens: 1,
+          bathrooms: 2,
+          furnished: true,
+          constructionYear: 2020,
+          waterSource: 'Municipal',
+          electricitySource: ['Building Generator'],
+          mapsLink: 'https://goo.gl/maps/2',
+          parking: 1,
+          totalFloors: 10,
+          floorNumber: 7,
+          elevator: true,
+        },
+        {
+          id: 3,
+          type: 'commercial',
+          coverImage: 'https://picsum.photos/seed/comm1/800/600',
+          address: {
+            en: 'Prime Commercial Space',
+            ar: 'مساحة تجارية مميزة',
+          },
+          price: 850000,
+          size: 300,
+          bedrooms: 0,
+          livingRooms: 0,
+          balconies: 0,
+          kitchens: 1,
+          bathrooms: 2,
+          furnished: false,
+          constructionYear: 2018,
+          waterSource: 'Municipal',
+          electricitySource: ['Building Generator', 'Other'],
+          mapsLink: 'https://goo.gl/maps/3',
+          parking: 5,
+          totalFloors: 5,
+          floorNumber: 2,
+          elevator: true,
+          description: 'Excellent commercial space in a high-traffic area, suitable for retail or office use. Includes a kitchenette and two bathrooms.'
+        },
+        {
+          id: 4,
+          type: 'land',
+          coverImage: 'https://picsum.photos/seed/land1/800/600',
+          address: {
+            en: 'Spacious Land with Sea View',
+            ar: 'أرض واسعة بإطلالة على البحر',
+          },
+          price: 600000,
+          size: 5000,
+          bedrooms: 0,
+          livingRooms: 0,
+          balconies: 0,
+          kitchens: 0,
+          bathrooms: 0,
+          furnished: false,
+          constructionYear: 0,
+          waterSource: 'N/A',
+          electricitySource: [],
+          mapsLink: 'https://goo.gl/maps/4',
+          parking: 0,
+        },
+        {
+          id: 5,
+          type: 'apartment',
+          coverImage: 'https://picsum.photos/seed/apt2/800/600',
+          address: {
+            en: 'Cozy Suburban Apartment',
+            ar: 'شقة مريحة في الضواحي',
+          },
+          price: 320000,
+          size: 120,
+          bedrooms: 2,
+          livingRooms: 1,
+          balconies: 1,
+          kitchens: 1,
+          bathrooms: 1,
+          furnished: false,
+          constructionYear: 2019,
+          waterSource: 'Municipal',
+          electricitySource: ['Solar'],
+          mapsLink: 'https://goo.gl/maps/5',
+          parking: 1,
+          totalFloors: 4,
+          floorNumber: 2,
+          elevator: false,
+        },
+        {
+          id: 6,
+          type: 'villa',
+          coverImage: 'https://picsum.photos/seed/villa2/800/600',
+          address: {
+              en: 'Luxury Beachfront Villa',
+              ar: 'فيلا فاخرة على شاطئ البحر'
+          },
+          price: 2500000,
+          size: 600,
+          bedrooms: 6,
+          livingRooms: 2,
+          balconies: 4,
+          kitchens: 2,
+          bathrooms: 5,
+          furnished: true,
+          constructionYear: 2023,
+          waterSource: 'Municipal',
+          electricitySource: ['Building Generator'],
+          mapsLink: 'https://goo.gl/maps/6',
+          parking: 4,
+          totalFloors: 3,
+          elevator: true,
+          description: 'An exquisite villa located directly on the beach, offering unparalleled luxury and direct access to the sea. Perfect for families or as a high-end vacation rental.'
+        }
+      ];
+
+      const initialFilterState = {
+          location: '',
+          bedrooms: '0',
+          minPrice: '',
+          maxPrice: '',
+          minSize: '',
+          maxSize: '',
+      };
+
+      // --- HOOKS ---
+
+      const useTranslations = () => {
+        const [lang, setLang] = useState('en');
+
+        const t = useCallback(
+          (key) => {
+            return translations[lang][key] || key;
+          },
+          [lang]
+        );
+
+        return { t, setLang, lang };
+      };
+
+      // --- ICONS ---
+
+      const LanguageIcon = (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} {...props}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h12M9 3v2m4.25 16h-6.5A2.25 2.25 0 013 18.75V10.5A2.25 2.25 0 015.25 8h1.5a2.25 2.25 0 012.25 2.25v.75m3 3v2m3-11h-3a2.25 2.25 0 00-2.25 2.25v7.5A2.25 2.25 0 0015 21h3a2.25 2.25 0 002.25-2.25v-7.5A2.25 2.25 0 0018 9h-3m-3-4v2" />
+        </svg>
+      );
+
+      const BurgerIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+      );
+
+      const CloseIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+      );
+
+      const UploadIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+      );
+
+      const SearchIcon = (props) => (
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" {...props}>
+          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+        </svg>
+      );
+
+      const BedIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+          </svg>
+      );
+
+      const BathIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 5.182a4.5 4.5 0 01.353 6.206l-4.173 4.173-1.06-1.06-4.174-4.173a4.5 4.5 0 116.364-6.364l.707.707.707-.707a4.5 4.5 0 016.053.353z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.364 17.636l1.06-1.06-4.173-4.173-1.06 1.06a4.5 4.5 0 006.173 6.173z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.243 16.243l-1.06-1.06-4.173 4.173 1.06 1.06a4.5 4.5 0 006.173-6.173z" />
+          </svg>
+      );
+
+      const RulerIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
+          </svg>
+      );
+
+      const ParkingIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+      );
+
+      const PdfIcon = (props) => (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v2.25h2.25" />
+          </svg>
+      );
+
+      // --- COMPONENTS ---
+
+      const Logo = ({ language, ...props }) => {
+        return (
+          <svg width="155" height="42" viewBox="0 0 155 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ direction: 'ltr' }} {...props}>
+            <g className="text-brand-secondary" transform="translate(0, 0)">
+              <path d="M44.5 13.134L22.5 2.5L0.5 13.134V41.5H44V13.134Z" stroke="currentColor" strokeWidth="4" strokeLinejoin="round"/>
+              <path d="M10.5 25.5L19.5 33.5L32.5 19.5" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+            </g>
+            <g className="text-brand-primary" fontFamily="Inter, sans-serif" fontSize="20" fontWeight="800">
+              <text x="55" y="20" fill="currentColor" textAnchor="start">BY</text>
+              <text x="55" y="40" fill="currentColor" textAnchor="start">OWNER</text>
+            </g>
+          </svg>
+        );
+      };
+
+      const Header = ({
+        language,
+        onLanguageToggle,
+        t,
+        onShowForm,
+        onShowHome,
+        activeCategory,
+        onSelectCategory,
+      }) => {
+        const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+        const navLinks = [
+          { labelKey: 'all', category: 'all' },
+          { labelKey: 'villas', category: 'villa' },
+          { labelKey: 'apartments', category: 'apartment' },
+          { labelKey: 'commercial', category: 'commercial' },
+          { labelKey: 'land', category: 'land' },
+        ];
+        
+        const handleSelectCategoryAndCloseMenu = (category) => {
+          onSelectCategory(category);
+          setIsMenuOpen(false);
+        }
+
+        const handleShowFormAndCloseMenu = () => {
+          onShowForm();
+          setIsMenuOpen(false);
+        }
+        
+        const handleShowHomeAndCloseMenu = () => {
+          onShowHome();
+          setIsMenuOpen(false);
+        }
 
         return (
-          <div className="min-h-screen flex flex-col">
-            {/* Header */}
-            <header className="bg-brand-primary text-white">
-              <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full bg-brand-secondary flex items-center justify-center text-white font-bold">
-                    BY
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold tracking-tight">
-                      By Owner
-                    </h1>
-                    <p className="text-xs text-gray-300">
-                      El Marakibji Properties – Direct Listings
-                    </p>
-                  </div>
+          <header className="bg-white shadow-md sticky top-0 z-50">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-20">
+                <div className="flex items-center">
+                  <button onClick={handleShowHomeAndCloseMenu} className="flex-shrink-0">
+                    <Logo className="h-10 w-auto" language={language} />
+                  </button>
                 </div>
-                <span className="text-xs md:text-sm text-gray-300">
-                  For internal review & publishing only
-                </span>
-              </div>
-            </header>
 
-            {/* Hero / Intro */}
-            <section className="bg-white border-b border-gray-200">
-              <div className="max-w-5xl mx-auto px-4 py-8 md:py-10 grid gap-6 md:grid-cols-2 items-center">
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-extrabold text-brand-primary mb-3">
-                    Submit your property directly to El Marakibji
-                  </h2>
-                  <p className="text-gray-700 mb-4">
-                    This secure form lets property owners send their listing
-                    details for review. Our team will verify the information and
-                    contact you before publishing it on our platforms.
-                  </p>
-                  <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-                    <li>No public posting – review first.</li>
-                    <li>We may contact you via WhatsApp for photos & documents.</li>
-                    <li>Your data is handled confidentially.</li>
-                  </ul>
-                </div>
-                <div className="hidden md:block">
-                  <div className="rounded-2xl bg-brand-secondary/10 border border-brand-secondary/30 p-4">
-                    <p className="text-sm text-brand-dark font-medium mb-2">
-                      What you’ll need:
-                    </p>
-                    <ul className="text-sm text-gray-800 space-y-1 list-disc list-inside">
-                      <li>Owner name & contact number</li>
-                      <li>Property location & type</li>
-                      <li>Approximate area & asking price (if known)</li>
-                      <li>Basic specs (bedrooms, bathrooms, parking…)</li>
-                    </ul>
-                    <p className="mt-3 text-xs text-gray-600">
-                      You can always send us photos, title deed, and videos later
-                      on WhatsApp once we contact you.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Main content */}
-            <main className="flex-1 bg-brand-light">
-              <div className="max-w-5xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-                {/* Submission Form */}
-                <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 md:p-6">
-                  <h3 className="text-lg font-semibold text-brand-primary mb-1">
-                    Property submission form
-                  </h3>
-                  <p className="text-xs text-gray-600 mb-4">
-                    Fill as much as you know — we’ll clarify the rest with you.
-                  </p>
-
-                  <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          Owner full name *
-                        </label>
-                        <input
-                          type="text"
-                          name="ownerName"
-                          value={form.ownerName}
-                          onChange={handleChange}
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          Phone / WhatsApp *
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={form.phone}
-                          onChange={handleChange}
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                          placeholder="+961..."
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          Property type
-                        </label>
-                        <select
-                          name="propertyType"
-                          value={form.propertyType}
-                          onChange={handleChange}
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                        >
-                          <option value="">Select type</option>
-                          <option>Apartment</option>
-                          <option>Duplex</option>
-                          <option>Villa / House</option>
-                          <option>Land</option>
-                          <option>Commercial</option>
-                          <option>Other</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          Location (area, city) *
-                        </label>
-                        <input
-                          type="text"
-                          name="location"
-                          value={form.location}
-                          onChange={handleChange}
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                          placeholder="Example: Mar Elias, Beirut"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-3">
-                      <div>
-                        <label className="block mb-1 font-medium">Bedrooms</label>
-                        <input
-                          type="number"
-                          min="0"
-                          name="bedrooms"
-                          value={form.bedrooms}
-                          onChange={handleChange}
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                        />
-                      </div>
-                      <div>
-                        <label className="block mb-1 font-medium">Bathrooms</label>
-                        <input
-                          type="number"
-                          min="0"
-                          name="bathrooms"
-                          value={form.bathrooms}
-                          onChange={handleChange}
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                        />
-                      </div>
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          Asking price (optional)
-                        </label>
-                        <input
-                          type="text"
-                          name="price"
-                          value={form.price}
-                          onChange={handleChange}
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                          placeholder="USD or LBP"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block mb-1 font-medium">
-                        Extra details
-                      </label>
-                      <textarea
-                        name="notes"
-                        value={form.notes}
-                        onChange={handleChange}
-                        rows="4"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                        placeholder="Floor, building name, view, parking, title deed status, generator, water, any notes…"
-                      ></textarea>
-                    </div>
-
+                <nav className="hidden md:flex md:space-x-8 rtl:md:space-x-reverse">
+                  {navLinks.map(({ labelKey, category }) => (
                     <button
-                      type="submit"
-                      className="mt-2 inline-flex items-center justify-center rounded-full bg-brand-secondary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:ring-offset-2"
+                      key={category}
+                      onClick={() => onSelectCategory(category)}
+                      className={`font-medium transition-colors pb-1 ${
+                        activeCategory === category
+                          ? 'text-brand-secondary border-b-2 border-brand-secondary'
+                          : 'text-gray-600 hover:text-brand-secondary'
+                      }`}
                     >
-                      Submit property to El Marakibji
+                      {t(labelKey)}
                     </button>
-                  </form>
-                </section>
+                  ))}
+                </nav>
 
-                {/* Submissions list (for you to review) */}
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-brand-primary">
-                      Latest submissions (local to this browser)
-                    </h3>
-                    <span className="text-xs text-gray-500">
-                      Not synced – just for your view
-                    </span>
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <button
+                    onClick={onShowForm}
+                    className="hidden sm:inline-block bg-brand-secondary text-white font-bold py-2 px-5 rounded-lg shadow-md hover:bg-opacity-90 transition-all transform hover:scale-105"
+                  >
+                    {t('submit_your_property')}
+                  </button>
+                  <button
+                    onClick={onLanguageToggle}
+                    className="flex items-center p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-secondary"
+                    aria-label="Toggle language"
+                  >
+                    <LanguageIcon className="h-6 w-6" />
+                    <span className="ms-2 font-semibold uppercase">{language === 'en' ? 'AR' : 'EN'}</span>
+                  </button>
+                  <div className="md:hidden">
+                      <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-md text-gray-600 hover:bg-gray-100">
+                          {isMenuOpen ? <CloseIcon className="w-6 h-6" /> : <BurgerIcon className="w-6 h-6" />}
+                      </button>
                   </div>
-
-                  {submissions.length === 0 ? (
-                    <div className="text-xs text-gray-500 bg-white rounded-2xl border border-dashed border-gray-300 p-4">
-                      No properties submitted in this browser yet. Once someone
-                      fills the form, you’ll see a summary card here.
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {submissions.map((p) => (
-                        <article
-                          key={p.id}
-                          className="bg-white rounded-2xl border border-gray-200 p-4 text-sm"
-                        >
-                          <div className="flex justify-between items-start gap-3">
-                            <div>
-                              <h4 className="font-semibold text-brand-primary mb-1">
-                                {p.propertyType || "Property"} –{" "}
-                                {p.location || "Location not specified"}
-                              </h4>
-                              <p className="text-xs text-gray-600 mb-1">
-                                Owner: <span className="font-medium">{p.ownerName}</span> ·{" "}
-                                {p.phone}
-                              </p>
-                              {p.price && (
-                                <p className="text-xs text-brand-dark mb-1">
-                                  Asking price: {p.price}
-                                </p>
-                              )}
-                              <p className="text-xs text-gray-600">
-                                {p.bedrooms && `${p.bedrooms} BR · `} 
-                                {p.bathrooms && `${p.bathrooms} BA`}
-                              </p>
-                            </div>
-                            <span className="text-[10px] px-2 py-1 rounded-full bg-brand-secondary/10 text-brand-dark">
-                              New
-                            </span>
-                          </div>
-                          {p.notes && (
-                            <p className="mt-2 text-xs text-gray-700 whitespace-pre-wrap">
-                              {p.notes}
-                            </p>
-                          )}
-                        </article>
-                      ))}
-                    </div>
-                  )}
-                </section>
+                </div>
               </div>
-            </main>
+            </div>
 
-            {/* Footer */}
-            <footer className="border-t border-gray-200 bg-white">
-              <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2">
-                <p className="text-xs text-gray-500">
-                  © {new Date().getFullYear()} El Marakibji İç ve Dış Tic. Ltd. Şti. – Internal
-                  “By Owner” submission form.
-                </p>
-                <p className="text-xs text-gray-500">
-                  Built for internal use. Data is reviewed manually before any
-                  public publishing.
-                </p>
+            {/* Mobile Menu */}
+            <div className={`md:hidden absolute top-20 left-0 right-0 bg-white shadow-lg z-40 transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : (language === 'ar' ? 'translate-x-full' : '-translate-x-full')}`}>
+              <nav className="flex flex-col items-center space-y-4 p-6">
+                {navLinks.map(({ labelKey, category }) => (
+                    <button
+                      key={category}
+                      onClick={() => handleSelectCategoryAndCloseMenu(category)}
+                      className={`font-medium text-lg w-full text-center py-2 rounded-md ${
+                        activeCategory === category
+                          ? 'text-white bg-brand-secondary'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {t(labelKey)}
+                    </button>
+                  ))}
+                  <button
+                    onClick={handleShowFormAndCloseMenu}
+                    className="w-full bg-brand-secondary text-white font-bold py-3 px-5 rounded-lg shadow-md hover:bg-opacity-90 transition-all text-lg mt-4"
+                  >
+                    {t('submit_your_property')}
+                  </button>
+              </nav>
+            </div>
+          </header>
+        );
+      };
+
+      const HeroSlider = ({ properties, t }) => {
+        const [currentIndex, setCurrentIndex] = useState(0);
+
+        const nextSlide = useCallback(() => {
+          setCurrentIndex((prevIndex) => (prevIndex + 1) % properties.length);
+        }, [properties.length]);
+
+        useEffect(() => {
+          const interval = setInterval(nextSlide, 5000);
+          return () => clearInterval(interval);
+        }, [nextSlide]);
+
+        const goToSlide = (index) => {
+          setCurrentIndex(index);
+        };
+        
+        const currentProperty = properties[currentIndex];
+
+        return (
+          <div className="relative w-full h-[60vh] max-h-[600px] overflow-hidden bg-brand-dark">
+            {properties.map((property, index) => (
+              <div
+                key={property.id}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                  index === currentIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <img
+                  src={property.coverImage}
+                  alt={t(property.type)}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-50"></div>
               </div>
-            </footer>
+            ))}
+            
+            <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center p-4">
+              <h2 className="text-4xl md:text-6xl font-bold drop-shadow-lg mb-4 animate-fade-in-down">
+                {t(currentProperty.type)}
+              </h2>
+              <p className="text-xl md:text-2xl drop-shadow-lg animate-fade-in-up">
+                {currentProperty.address.en}
+              </p>
+            </div>
+
+            <div className="absolute z-20 bottom-5 left-1/2 -translate-x-1/2 flex space-x-3 rtl:space-x-reverse">
+              {properties.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    currentIndex === index ? 'bg-brand-secondary scale-125' : 'bg-white opacity-50'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         );
+      };
+
+      const SubmissionSuccessModal = ({
+        isOpen,
+        onClose,
+        t,
+      }) => {
+        if (!isOpen) return null;
+
+        return (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4"
+            onClick={onClose}
+          >
+            <div
+              className="bg-white rounded-lg shadow-2xl w-full max-w-md mx-auto p-6 md:p-8 text-center transform transition-all animate-fade-in-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('submission_successful')}</h3>
+              <p className="text-gray-600 mb-6">
+                {t('submission_disclaimer')}
+              </p>
+              <button
+                onClick={onClose}
+                className="w-full bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-colors"
+              >
+                {t('close')}
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      const FormSection = ({ title, children }) => (
+          <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg mb-8">
+              <h3 className="text-2xl font-bold text-brand-primary mb-6 border-b-2 border-brand-secondary pb-3">{title}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {children}
+              </div>
+          </div>
+      );
+
+      const InputField = ({ label, placeholder, type = 'text', name, value, onChange, required=false, fullWidth=false }) => (
+          <div className={fullWidth ? 'md:col-span-2' : ''}>
+              <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
+              <input
+                  type={type}
+                  id={name}
+                  name={name}
+                  value={value}
+                  onChange={onChange}
+                  placeholder={placeholder}
+                  required={required}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+              />
+          </div>
+      );
+
+      const SelectField = ({ label, name, value, onChange, children, required=false }) => (
+          <div>
+              <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
+              <select
+                  id={name}
+                  name={name}
+                  value={value}
+                  onChange={onChange}
+                  required={required}
+                  className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+              >
+                  {children}
+              </select>
+          </div>
+      );
+
+      const FileInput = ({ label, hint, name, onChange, accept, multiple=false, required=false, t}) => {
+          const [fileName, setFileName] = useState('');
+          const handleFileChange = (e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                  if (multiple) {
+                      setFileName(`${e.target.files.length} files selected`);
+                  } else {
+                      setFileName(e.target.files[0].name);
+                  }
+              } else {
+                  setFileName('');
+              }
+              onChange(e);
+          };
+
+          return (
+              <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                      <div className="space-y-1 text-center">
+                          <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
+                          <div className="flex text-sm text-gray-600">
+                              <label htmlFor={name} className="relative cursor-pointer bg-white rounded-md font-medium text-brand-secondary hover:text-brand-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-brand-secondary">
+                                  <span>{t('or_click_to_select')}</span>
+                                  <input id={name} name={name} type="file" className="sr-only" accept={accept} multiple={multiple} onChange={handleFileChange} required={required} />
+                              </label>
+                              <p className="ps-1">{t('drag_drop_files')}</p>
+                          </div>
+                          <p className="text-xs text-gray-500">{hint}</p>
+                          {fileName && <p className="text-sm text-brand-secondary font-medium pt-2">{fileName}</p>}
+                      </div>
+                  </div>
+              </div>
+          );
       }
 
-      const container = document.getElementById("root");
-      const root = ReactDOM.createRoot(container);
+      const PropertyForm = ({ t, language, onSubmitSuccess }) => {
+          const [formData, setFormData] = useState({
+              ownerName: '',
+              ownerPhone: '',
+              propertyType: '',
+              propertySize: '',
+              bedrooms: '0',
+              livingRooms: '0',
+              balconies: '0',
+              kitchens: '0',
+              bathrooms: '0',
+              furnished: 'no',
+              totalFloors: '',
+              floorNumber: '',
+              elevator: 'no',
+              constructionYear: '',
+              waterSource: '',
+              electricitySource: [],
+              mapsLink: '',
+              fullAddress: '',
+              price: '',
+              parking: '0',
+              description: '',
+          });
+
+          const [files, setFiles] = useState({
+              propertyImages: null,
+              documents: null,
+              ownerId: null,
+          });
+          
+          const handleInputChange = (e) => {
+              const { name, value } = e.target;
+              setFormData(prev => ({ ...prev, [name]: value }));
+          };
+
+          const handleCheckboxChange = (e) => {
+              const { value, checked } = e.target;
+              setFormData(prev => {
+                  const sources = prev.electricitySource;
+                  if (checked) {
+                      return { ...prev, electricitySource: [...sources, value] };
+                  } else {
+                      return { ...prev, electricitySource: sources.filter(source => source !== value) };
+                  }
+              });
+          };
+          
+          const handleFileChange = (e) => {
+              const { name, files: inputFiles } = e.target;
+              setFiles(prev => ({ ...prev, [name]: inputFiles }));
+          };
+
+          const filesToDataURLs = (fileList) => {
+              if (!fileList) return Promise.resolve([]);
+              const files = Array.from(fileList);
+              const promises = files.map(file => {
+                  return new Promise((resolve, reject) => {
+                      const reader = new FileReader();
+                      reader.onloadend = () => resolve(reader.result);
+                      reader.onerror = reject;
+                      reader.readAsDataURL(file);
+                  });
+              });
+              return Promise.all(promises);
+          };
+
+          const handleSubmit = async (e) => {
+              e.preventDefault();
+
+              const [uploadedImages, uploadedDocuments, uploadedOwnerId] = await Promise.all([
+                  filesToDataURLs(files.propertyImages),
+                  filesToDataURLs(files.documents),
+                  filesToDataURLs(files.ownerId),
+              ]);
+
+              const newSubmission = {
+                  id: Date.now(),
+                  status: 'pending',
+                  ownerName: formData.ownerName,
+                  ownerPhone: formData.ownerPhone,
+                  uploadedImages,
+                  uploadedDocuments,
+                  uploadedOwnerId,
+                  property: {
+                      type: formData.propertyType,
+                      size: Number(formData.propertySize),
+                      price: Number(formData.price),
+                      bedrooms: Number(formData.bedrooms),
+                      livingRooms: Number(formData.livingRooms),
+                      balconies: Number(formData.balconies),
+                      kitchens: Number(formData.kitchens),
+                      bathrooms: Number(formData.bathrooms),
+                      furnished: formData.furnished === 'yes',
+                      constructionYear: Number(formData.constructionYear),
+                      waterSource: formData.waterSource,
+                      electricitySource: formData.electricitySource,
+                      mapsLink: formData.mapsLink,
+                      fullAddress: formData.fullAddress,
+                      parking: Number(formData.parking),
+                      description: formData.description,
+                      ...( (formData.propertyType === 'apartment' || formData.propertyType === 'commercial') && {
+                          totalFloors: Number(formData.totalFloors),
+                          floorNumber: Number(formData.floorNumber),
+                          elevator: formData.elevator === 'yes',
+                      })
+                  }
+              };
+
+              onSubmitSuccess(newSubmission);
+          };
+
+          const propertyType = formData.propertyType;
+          const showBuildingFields = propertyType === 'apartment' || propertyType === 'commercial';
+          const showRoomFields = propertyType === 'apartment' || propertyType === 'villa' || propertyType === 'commercial';
+
+          return (
+              <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto">
+                  <FormSection title={t('owner_information')}>
+                      <InputField name="ownerName" label={t('owner_name')} placeholder={t('owner_name_placeholder')} value={formData.ownerName} onChange={handleInputChange} required />
+                      <InputField name="ownerPhone" type="tel" label={t('owner_phone')} placeholder={t('owner_phone_placeholder')} value={formData.ownerPhone} onChange={handleInputChange} required />
+                  </FormSection>
+
+                  <FormSection title={t('property_details')}>
+                      <SelectField name="propertyType" label={t('property_type')} value={formData.propertyType} onChange={handleInputChange} required>
+                          <option value="">{t('select_property_type')}</option>
+                          <option value="villa">{t('villa')}</option>
+                          <option value="apartment">{t('apartment')}</option>
+                          <option value="commercial">{t('commercial')}</option>
+                          <option value="land">{t('land')}</option>
+                      </SelectField>
+                      <InputField name="propertySize" type="number" label={t('property_size')} placeholder={t('property_size_placeholder')} value={formData.propertySize} onChange={handleInputChange} required />
+                      
+                      {showRoomFields && (
+                          <>
+                              <InputField name="bedrooms" type="number" label={t('bedrooms')} placeholder="0" value={formData.bedrooms} onChange={handleInputChange} />
+                              <InputField name="livingRooms" type="number" label={t('living_rooms')} placeholder="0" value={formData.livingRooms} onChange={handleInputChange} />
+                              <InputField name="balconies" type="number" label={t('balconies')} placeholder="0" value={formData.balconies} onChange={handleInputChange} />
+                              <InputField name="kitchens" type="number" label={t('kitchens')} placeholder="0" value={formData.kitchens} onChange={handleInputChange} />
+                              <InputField name="bathrooms" type="number" label={t('bathrooms')} placeholder="0" value={formData.bathrooms} onChange={handleInputChange} />
+                              <SelectField name="furnished" label={t('furnished')} value={formData.furnished} onChange={handleInputChange}>
+                                  <option value="no">{t('no')}</option>
+                                  <option value="yes">{t('yes')}</option>
+                              </SelectField>
+                          </>
+                      )}
+
+                      {showBuildingFields && (
+                           <>
+                              <InputField name="totalFloors" type="number" label={t('total_floors')} placeholder={t('total_floors_placeholder')} value={formData.totalFloors} onChange={handleInputChange} />
+                              <InputField name="floorNumber" type="number" label={t('floor_number')} placeholder={t('floor_number_placeholder')} value={formData.floorNumber} onChange={handleInputChange} />
+                              <SelectField name="elevator" label={t('elevator')} value={formData.elevator} onChange={handleInputChange}>
+                                  <option value="no">{t('no')}</option>
+                                  <option value="yes">{t('yes')}</option>
+                              </SelectField>
+                           </>
+                      )}
+                      
+                      <InputField name="constructionYear" type="number" label={t('construction_year')} placeholder={t('construction_year_placeholder')} value={formData.constructionYear} onChange={handleInputChange} required />
+                  </FormSection>
+
+                  <FormSection title={t('description')}>
+                      <div className="md:col-span-2">
+                          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">{t('description')}</label>
+                          <textarea id="description" name="description" rows={4} placeholder={t('description_placeholder')} value={formData.description} onChange={handleInputChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"></textarea>
+                      </div>
+                  </FormSection>
+                  
+                  <FormSection title={t('utilities')}>
+                      <InputField name="waterSource" label={t('water_source')} placeholder={t('water_source_placeholder')} value={formData.waterSource} onChange={handleInputChange} required />
+                      <InputField name="parking" type="number" label={t('parking_spaces')} placeholder={t('parking_spaces_placeholder')} value={formData.parking} onChange={handleInputChange} />
+                      <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">{t('electricity_source')} <span className="text-red-500">*</span></label>
+                          <div className="flex flex-wrap gap-x-6 gap-y-2">
+                              {['solar', 'building_generator', 'other'].map(source => (
+                                  <div key={source} className="flex items-center">
+                                      <input
+                                          id={`electricity_${source}`}
+                                          name="electricitySource"
+                                          type="checkbox"
+                                          value={source}
+                                          checked={formData.electricitySource.includes(source)}
+                                          onChange={handleCheckboxChange}
+                                          className="h-4 w-4 text-brand-secondary border-gray-300 rounded focus:ring-brand-secondary"
+                                      />
+                                      <label htmlFor={`electricity_${source}`} className="ms-2 block text-sm text-gray-900 rtl:me-2 rtl:ms-0">
+                                          {t(source)}
+                                      </label>
+                                  </div>
+                              ))}
+                          </div>
+                      </div>
+                  </FormSection>
+                  
+                  <FormSection title={t('location')}>
+                      <div className="relative md:col-span-2">
+                          <InputField name="mapsLink" label={t('google_maps_link')} placeholder={t('google_maps_link_placeholder')} value={formData.mapsLink} onChange={handleInputChange} fullWidth />
+                          <button type="button" disabled title={t('pick_on_map_tooltip')} className="absolute bottom-2 end-2 rtl:start-2 rtl:end-auto bg-gray-200 text-gray-500 text-sm font-bold py-1 px-3 rounded cursor-not-allowed">{t('pick_on_map')}</button>
+                      </div>
+                       <div className="md:col-span-2">
+                          <label htmlFor="fullAddress" className="block text-sm font-medium text-gray-700 mb-1">{t('full_address')} <span className="text-red-500">*</span></label>
+                          <textarea id="fullAddress" name="fullAddress" rows={3} placeholder={t('full_address_placeholder')} value={formData.fullAddress} onChange={handleInputChange} required className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"></textarea>
+                       </div>
+                  </FormSection>
+
+                  <FormSection title={t('uploads')}>
+                      <FileInput name="propertyImages" label={t('property_images')} hint={t('property_images_hint')} onChange={handleFileChange} accept="image/*" multiple required t={t} />
+                      <FileInput name="documents" label={t('official_documents')} hint={t('official_documents_hint')} onChange={handleFileChange} accept="image/*,.pdf" multiple required t={t} />
+                      <FileInput name="ownerId" label={t('owner_id')} hint={t('owner_id_hint')} onChange={handleFileChange} accept="image/*" required t={t} />
+                  </FormSection>
+
+                  <FormSection title={t('pricing')}>
+                       <InputField name="price" type="number" label={t('property_price')} placeholder={t('property_price_placeholder')} value={formData.price} onChange={handleInputChange} required fullWidth/>
+                  </FormSection>
+
+                  <div className="flex justify-end">
+                      <button type="submit" className="w-full md:w-auto bg-brand-primary text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-all text-lg transform hover:scale-105">
+                          {t('submit_listing')}
+                      </button>
+                  </div>
+              </form>
+          );
+      };
+
+      const FilterInput = ({ label, children }) => (
+          <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+              {children}
+          </div>
+      );
+
+      const FilterBar = ({ onApply, onReset, t }) => {
+          const [filters, setFilters] = useState(initialFilterState);
+
+          const handleChange = (e) => {
+              setFilters(prev => ({...prev, [e.target.name]: e.target.value}));
+          };
+
+          const handleApply = (e) => {
+              e.preventDefault();
+              onApply(filters);
+          };
+
+          const handleReset = () => {
+              setFilters(initialFilterState);
+              onReset();
+          };
+
+          return (
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                  <form onSubmit={handleApply} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                      
+                      <div className="sm:col-span-2 lg:col-span-4">
+                          <FilterInput label={t('location')}>
+                              <div className="relative">
+                                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                      <SearchIcon className="w-5 h-5 text-gray-500" />
+                                  </div>
+                                  <input
+                                      type="text"
+                                      name="location"
+                                      value={filters.location}
+                                      onChange={handleChange}
+                                      placeholder={t('search_by_location')}
+                                      className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-brand-primary focus:border-brand-primary"
+                                  />
+                              </div>
+                          </FilterInput>
+                      </div>
+
+                      <div className="lg:col-span-2">
+                          <FilterInput label={t('bedrooms')}>
+                               <select
+                                  name="bedrooms"
+                                  value={filters.bedrooms}
+                                  onChange={handleChange}
+                                  className="block w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-brand-primary focus:border-brand-primary"
+                              >
+                                  <option value="0">{t('any')}</option>
+                                  <option value="1">1+</option>
+                                  <option value="2">2+</option>
+                                  <option value="3">3+</option>
+                                  <option value="4">4+</option>
+                                  <option value="5">5+</option>
+                              </select>
+                          </FilterInput>
+                      </div>
+                      
+                      <div className="lg:col-span-2">
+                          <FilterInput label={t('price_range')}>
+                              <div className="flex space-x-2 rtl:space-x-reverse">
+                                  <input
+                                      type="number"
+                                      name="minPrice"
+                                      value={filters.minPrice}
+                                      onChange={handleChange}
+                                      placeholder={t('min_price')}
+                                      className="block w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-brand-primary focus:border-brand-primary"
+                                  />
+                                  <input
+                                      type="number"
+                                      name="maxPrice"
+                                      value={filters.maxPrice}
+                                      onChange={handleChange}
+                                      placeholder={t('max_price')}
+                                      className="block w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-brand-primary focus:border-brand-primary"
+                                  />
+                              </div>
+                          </FilterInput>
+                      </div>
+
+                      <div className="lg:col-span-2">
+                          <FilterInput label={t('size_range')}>
+                             <div className="flex space-x-2 rtl:space-x-reverse">
+                                  <input
+                                      type="number"
+                                      name="minSize"
+                                      value={filters.minSize}
+                                      onChange={handleChange}
+                                      placeholder={t('min_size')}
+                                      className="block w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-brand-primary focus:border-brand-primary"
+                                  />
+                                   <input
+                                      type="number"
+                                      name="maxSize"
+                                      value={filters.maxSize}
+                                      onChange={handleChange}
+                                      placeholder={t('max_size')}
+                                      className="block w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-brand-primary focus:border-brand-primary"
+                                  />
+                              </div>
+                          </FilterInput>
+                      </div>
+
+                      <div className="sm:col-span-2 lg:col-span-2 flex space-x-2 rtl:space-x-reverse">
+                          <button type="submit" className="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-brand-dark transition-colors">
+                              {t('apply_filters')}
+                          </button>
+                          <button type="button" onClick={handleReset} className="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                              {t('reset_filters')}
+                          </button>
+                      </div>
+
+                  </form>
+              </div>
+          );
+      };
+
+      const DetailSection = ({ title, children }) => (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold text-brand-primary mb-4 border-b pb-2">{title}</h3>
+          <div className="space-y-3">{children}</div>
+        </div>
+      );
+
+      const KeyDetailItem = ({ icon, value, label }) => (
+        <div className="flex flex-col items-center text-center p-4 bg-brand-light rounded-lg">
+          <div className="text-brand-primary mb-2">{icon}</div>
+          <span className="text-lg font-bold text-brand-dark">{value}</span>
+          <span className="text-sm text-gray-600">{label}</span>
+        </div>
+      );
+
+      const PropertyDetailView = ({ property, t, onBack, language }) => {
+        const DetailRow = ({ label, value }) => (
+          <div className="flex justify-between text-gray-700">
+            <span className="font-medium">{label}:</span>
+            <span className="text-gray-900">{Array.isArray(value) ? value.map(v => t(v)).join(', ') : value ?? 'N/A'}</span>
+          </div>
+        );
+
+        return (
+          <div className="animate-fade-in">
+              <div className="bg-white shadow-sm">
+                   <div className="container mx-auto px-4">
+                      <button onClick={onBack} className="text-brand-primary font-semibold hover:text-brand-dark py-4 transition-colors flex items-center">
+                          <span className={language === 'ar' ? 'transform rotate-180' : ''}>&larr; </span>
+                          <span className="ms-2">{t('back_to_listings')}</span>
+                      </button>
+                   </div>
+              </div>
+
+              <div className="container mx-auto px-4 py-8">
+                  <div className="max-w-7xl mx-auto">
+                      <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+                          {/* Left/Main Column */}
+                          <div className="lg:col-span-2 space-y-8">
+                              <div className="overflow-hidden rounded-lg shadow-lg">
+                                  <img src={property.coverImage} alt={t(property.type)} className="w-full h-auto max-h-[500px] object-cover"/>
+                              </div>
+                              
+                              <DetailSection title={t('key_details')}>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                      <KeyDetailItem icon={<RulerIcon className="w-8 h-8"/>} value={`${property.size} m²`} label={t('property_size')} />
+                                      <KeyDetailItem icon={<BedIcon className="w-8 h-8"/>} value={property.bedrooms} label={t('bedrooms')} />
+                                      <KeyDetailItem icon={<BathIcon className="w-8 h-8"/>} value={property.bathrooms} label={t('bathrooms')} />
+                                      <KeyDetailItem icon={<ParkingIcon className="w-8 h-8"/>} value={property.parking} label={t('parking')} />
+                                  </div>
+                              </DetailSection>
+
+                              {property.description && (
+                                  <DetailSection title={t('description')}>
+                                      <p className="text-gray-700 whitespace-pre-wrap">{property.description}</p>
+                                  </DetailSection>
+                              )}
+
+                              <DetailSection title={t('general_information')}>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                                      <DetailRow label={t('construction_year')} value={property.constructionYear} />
+                                      <DetailRow label={t('furnished')} value={property.furnished ? t('yes') : t('no')} />
+                                      {property.totalFloors && <DetailRow label={t('total_floors')} value={property.totalFloors} />}
+                                      {property.floorNumber && <DetailRow label={t('floor_number')} value={property.floorNumber} />}
+                                      {property.elevator !== undefined && <DetailRow label={t('elevator')} value={property.elevator ? t('yes') : t('no')} />}
+                                  </div>
+                              </DetailSection>
+
+                              <DetailSection title={t('utilities_info')}>
+                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                                      <DetailRow label={t('water_source')} value={property.waterSource} />
+                                      <DetailRow label={t('electricity_source')} value={property.electricitySource} />
+                                   </div>
+                              </DetailSection>
+                          </div>
+
+                          {/* Right/Sidebar Column */}
+                          <aside className="lg:col-span-1 mt-8 lg:mt-0 lg:sticky top-24 self-start">
+                             <div className="bg-white p-6 rounded-lg shadow-lg space-y-4">
+                                 <span className="inline-block bg-brand-secondary text-white text-sm font-semibold px-3 py-1 rounded-full mb-2 capitalize">{t(property.type)}</span>
+                                 <h1 className="text-2xl font-bold text-brand-primary">{property.address[language] || property.address['en']}</h1>
+                                 <p className="text-4xl font-extrabold text-brand-dark">{`$${property.price.toLocaleString()}`}</p>
+                                 <a 
+                                   href={property.mapsLink} 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   className="w-full block text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-all text-lg"
+                                 >
+                                     {t('view_on_map')}
+                                 </a>
+                             </div>
+                          </aside>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        );
+      };
+
+      const DetailSectionModal = ({ title, children, gridCols = 2 }) => (
+          <div>
+            <h3 className="text-lg font-bold text-brand-primary mb-3 border-b pb-2">{title}</h3>
+            <div className={`grid grid-cols-1 md:grid-cols-${gridCols} gap-x-6 gap-y-2 text-sm`}>{children}</div>
+          </div>
+      );
+
+      const DetailRowModal = ({ label, value }) => (
+        <div className="flex justify-between py-1 items-start">
+          <span className="font-semibold text-gray-600 flex-shrink-0">{label}:</span>
+          <span className="text-gray-900 text-right ps-2">{
+              Array.isArray(value) ? value.join(', ') :
+              value === true ? 'Yes' : 
+              value === false ? 'No' : 
+              value ?? 'N/A'
+          }</span>
+        </div>
+      );
+
+      const FilePreview = ({ fileSrc, index, type, t }) => {
+          const isPdf = fileSrc.startsWith('data:application/pdf');
+          return (
+              <a 
+                  href={fileSrc} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  key={`${type}-${index}`} 
+                  className="group block w-full h-24 rounded-md border border-gray-200 flex flex-col items-center justify-center text-center p-2 hover:bg-gray-50 transition-colors relative overflow-hidden"
+              >
+                {isPdf ? (
+                  <>
+                      <PdfIcon className="w-8 h-8 text-red-500 mb-1" />
+                      <span className="text-xs text-gray-600 block truncate">{t('view')} PDF</span>
+                  </>
+                ) : (
+                  <img src={fileSrc} alt={`Uploaded file ${index + 1}`} className="w-full h-full object-cover rounded-sm" />
+                )}
+              </a>
+          );
+      };
+
+      const SubmissionDetailModal = ({
+        isOpen,
+        onClose,
+        submission,
+        onApprove,
+        onReject,
+        t,
+        language,
+        viewMode = 'review',
+      }) => {
+        const [selectedCoverImage, setSelectedCoverImage] = useState(null);
+        const [error, setError] = useState('');
+        
+        if (!isOpen) return null;
+
+        const handleApproveClick = () => {
+          if (!selectedCoverImage) {
+              setError('Please select a cover image to approve the submission.');
+              return;
+          }
+          onApprove(selectedCoverImage);
+        }
+        
+        const { property } = submission;
+
+        return (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4"
+            onClick={onClose}
+          >
+            <div
+              className="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-auto transform transition-all animate-fade-in-up flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b flex justify-between items-center">
+                  <div>
+                      <h2 className="text-2xl font-bold text-brand-dark">{t('property_details')}</h2>
+                      <p className="text-gray-500">{property.fullAddress}</p>
+                  </div>
+                  <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600">&times;</button>
+              </div>
+              
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[65vh]">
+                  <DetailSectionModal title={t('owner_information')}>
+                      <DetailRowModal label={t('owner_name')} value={submission.ownerName} />
+                      <DetailRowModal label={t('owner_phone')} value={submission.ownerPhone} />
+                  </DetailSectionModal>
+
+                  <DetailSectionModal title={t('general_information')}>
+                      <DetailRowModal label={t('property_type')} value={t(property.type)} />
+                      <DetailRowModal label={t('property_size')} value={`${property.size} m²`} />
+                      <DetailRowModal label={t('property_price')} value={`$${property.price.toLocaleString()}`} />
+                      <DetailRowModal label={t('construction_year')} value={property.constructionYear} />
+                      <DetailRowModal label={t('furnished')} value={property.furnished} />
+                      
+                      {property.bedrooms > 0 && <DetailRowModal label={t('bedrooms')} value={property.bedrooms} />}
+                      {property.bathrooms > 0 && <DetailRowModal label={t('bathrooms')} value={property.bathrooms} />}
+                      {property.livingRooms > 0 && <DetailRowModal label={t('living_rooms')} value={property.livingRooms} />}
+                      {property.kitchens > 0 && <DetailRowModal label={t('kitchens')} value={property.kitchens} />}
+                      {property.balconies > 0 && <DetailRowModal label={t('balconies')} value={property.balconies} />}
+                     
+                      {property.totalFloors !== undefined && <DetailRowModal label={t('total_floors')} value={property.totalFloors} />}
+                      {property.floorNumber !== undefined && <DetailRowModal label={t('floor_number')} value={property.floorNumber} />}
+                      {property.elevator !== undefined && <DetailRowModal label={t('elevator')} value={property.elevator} />}
+                  </DetailSectionModal>
+                  
+                  {property.description && (
+                      <DetailSectionModal title={t('description')} gridCols={1}>
+                          <p className="text-gray-700 text-sm whitespace-pre-wrap">{property.description}</p>
+                      </DetailSectionModal>
+                  )}
+
+                   <DetailSectionModal title={t('utilities_info')}>
+                      <DetailRowModal label={t('water_source')} value={property.waterSource} />
+                      <DetailRowModal label={t('electricity_source')} value={property.electricitySource.map(s => t(s)).join(', ')} />
+                      <DetailRowModal label={t('parking_spaces')} value={property.parking} />
+                  </DetailSectionModal>
+
+                  <DetailSectionModal title={t('location_info')} gridCols={1}>
+                      <DetailRowModal label={t('google_maps_link')} value={property.mapsLink} />
+                      <DetailRowModal label={t('full_address')} value={property.fullAddress} />
+                  </DetailSectionModal>
+
+                  <DetailSectionModal title={t('uploaded_documents')} gridCols={1}>
+                      {submission.uploadedDocuments.length > 0 ? (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                              {submission.uploadedDocuments.map((src, index) => <FilePreview fileSrc={src} index={index} type="doc" t={t} />)}
+                          </div>
+                      ) : <p className="text-gray-500 text-sm">{t('no_documents_uploaded')}</p>}
+                  </DetailSectionModal>
+
+                  <DetailSectionModal title={t('owner_id_card_view')} gridCols={1}>
+                      {submission.uploadedOwnerId.length > 0 ? (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                              {submission.uploadedOwnerId.map((src, index) => <FilePreview fileSrc={src} index={index} type="id" t={t} />)}
+                          </div>
+                      ) : <p className="text-gray-500 text-sm">{t('no_id_uploaded')}</p>}
+                  </DetailSectionModal>
+              </div>
+
+              {viewMode === 'review' ? (
+                  <div className="p-6 bg-gray-50 border-t space-y-4">
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">{t('choose_cover_image')} <span className="text-red-500">*</span></label>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                              {submission.uploadedImages.map((imgSrc, index) => (
+                                  <div key={index} className="relative cursor-pointer group" onClick={() => {
+                                      setSelectedCoverImage(imgSrc);
+                                      setError('');
+                                  }}>
+                                      <img 
+                                          src={imgSrc} 
+                                          alt={`Uploaded property image ${index + 1}`}
+                                          className={`w-full h-24 object-cover rounded-md border-4 transition-all ${selectedCoverImage === imgSrc ? 'border-brand-secondary' : 'border-transparent group-hover:border-gray-300'}`}
+                                      />
+                                      {selectedCoverImage === imgSrc && (
+                                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-md">
+                                              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                              </svg>
+                                          </div>
+                                      )}
+                                  </div>
+                              ))}
+                          </div>
+                          {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+                      </div>
+                      <div className="flex justify-end items-center space-x-3 rtl:space-x-reverse">
+                           <button 
+                              onClick={onReject}
+                              className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+                          >
+                              {t('reject')}
+                          </button>
+                           <button 
+                              onClick={handleApproveClick}
+                              className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                           >
+                              {t('approve')}
+                          </button>
+                      </div>
+                  </div>
+              ) : (
+                   <div className="p-6 bg-gray-50 border-t flex justify-end items-center">
+                       <button
+                          onClick={onClose}
+                          className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                          {t('close')}
+                      </button>
+                   </div>
+              )}
+            </div>
+          </div>
+        );
+      };
+
+      const AdminView = ({ 
+          pendingSubmissions, 
+          approvedSubmissions,
+          mockProperties,
+          onApprove, 
+          onReject, 
+          onRemovePublished,
+          t, 
+          language 
+      }) => {
+          const [selectedPendingSubmission, setSelectedPendingSubmission] = useState(null);
+          const [selectedPublishedSubmission, setSelectedPublishedSubmission] = useState(null);
+          const [activeTab, setActiveTab] = useState('pending');
+          const [isAuthenticated, setIsAuthenticated] = useState(false);
+          const [username, setUsername] = useState('');
+          const [password, setPassword] = useState('');
+          const [loginError, setLoginError] = useState('');
+
+          const handleLogin = (e) => {
+              e.preventDefault();
+              if (username === 'MarakibjiRealEstate' && password === 'M@rakibji_2@25') {
+                  setIsAuthenticated(true);
+                  setLoginError('');
+              } else {
+                  setLoginError(t('invalid_credentials'));
+              }
+          };
+
+          if (!isAuthenticated) {
+              return (
+                   <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[50vh]">
+                      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+                          <h2 className="text-2xl font-bold text-brand-primary mb-6 text-center">{t('admin_login')}</h2>
+                          <form onSubmit={handleLogin} className="space-y-6">
+                              <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('username')}</label>
+                                  <input
+                                      type="text"
+                                      value={username}
+                                      onChange={(e) => setUsername(e.target.value)}
+                                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary"
+                                  />
+                              </div>
+                              <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('password')}</label>
+                                  <input
+                                      type="password"
+                                      value={password}
+                                      onChange={(e) => setPassword(e.target.value)}
+                                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary"
+                                  />
+                              </div>
+                              {loginError && <p className="text-red-500 text-sm text-center">{loginError}</p>}
+                              <button
+                                  type="submit"
+                                  className="w-full bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark transition-colors"
+                              >
+                                  {t('login')}
+                              </button>
+                          </form>
+                      </div>
+                  </div>
+              );
+          }
+
+          const handleApprove = (coverImage) => {
+              if (selectedPendingSubmission) {
+                  onApprove(selectedPendingSubmission.id, coverImage);
+                  setSelectedPendingSubmission(null);
+              }
+          };
+
+          const handleReject = () => {
+              if (selectedPendingSubmission) {
+                  onReject(selectedPendingSubmission.id);
+                  setSelectedPendingSubmission(null);
+              }
+          };
+
+          const handleRemoveClick = (id) => {
+              if (window.confirm(t('remove_property_confirm'))) {
+                  onRemovePublished(id);
+              }
+          };
+
+          const renderSubmissionList = (submissions) => {
+              if (submissions.length === 0) {
+                  return (
+                      <div className="text-center bg-white p-8 rounded-lg shadow-md">
+                          <p className="text-gray-500">{t('no_pending_submissions')}</p>
+                      </div>
+                  );
+              }
+
+              return (
+                  <div className="space-y-6">
+                      {submissions.map((sub) => (
+                          <div key={sub.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                              <div className="p-6">
+                                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                                      <div>
+                                          <span className='inline-block text-sm font-semibold px-3 py-1 rounded-full mb-3 capitalize bg-yellow-200 text-yellow-800'>
+                                              {t(sub.property.type)}
+                                          </span>
+                                          <h3 className="text-xl font-bold text-brand-primary mb-1">{sub.property.fullAddress}</h3>
+                                          <p className="text-gray-600 text-sm">{t('owner_name')}: {sub.ownerName} | {sub.ownerPhone}</p>
+                                      </div>
+                                      <p className="text-2xl font-bold text-brand-secondary flex-shrink-0 mt-3 sm:mt-0 sm:ms-6">{`$${sub.property.price.toLocaleString()}`}</p>
+                                  </div>
+                              </div>
+                              <div className="bg-gray-50 p-4 flex justify-end items-center space-x-2 rtl:space-x-reverse">
+                                  <button 
+                                      onClick={() => setSelectedPendingSubmission(sub)}
+                                      className="bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark transition-colors text-sm"
+                                  >
+                                      {t('view_details')}
+                                  </button>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              );
+          };
+          
+          const renderPublishedList = () => {
+              const totalPublished = mockProperties.length + approvedSubmissions.length;
+              if (totalPublished === 0) {
+                  return (
+                      <div className="text-center bg-white p-8 rounded-lg shadow-md">
+                          <p className="text-gray-500">{t('no_published_properties')}</p>
+                      </div>
+                  );
+              }
+
+              return (
+                  <div className="space-y-6">
+                      {approvedSubmissions.map((sub) => (
+                          <div key={sub.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                              <div className="p-6">
+                                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                                      <div>
+                                          <span className={`inline-block text-sm font-semibold px-3 py-1 rounded-full mb-3 capitalize bg-green-200 text-green-800`}>
+                                              {t(sub.property.type)}
+                                          </span>
+                                          <h3 className="text-xl font-bold text-brand-primary mb-1">{sub.property.fullAddress}</h3>
+                                      </div>
+                                      <p className="text-2xl font-bold text-brand-secondary flex-shrink-0 mt-3 sm:mt-0 sm:ms-6">{`$${sub.property.price.toLocaleString()}`}</p>
+                                  </div>
+                              </div>
+                              <div className="bg-gray-50 p-4 flex justify-end items-center space-x-2 rtl:space-x-reverse">
+                                   <button 
+                                      onClick={() => setSelectedPublishedSubmission(sub)}
+                                      className="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                                  >
+                                      {t('view_details')}
+                                  </button>
+                                  <button
+                                      onClick={() => handleRemoveClick(sub.id)}
+                                      className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors text-sm"
+                                  >
+                                      {t('remove')}
+                                  </button>
+                              </div>
+                          </div>
+                      ))}
+                      {mockProperties.map((prop) => (
+                          <div key={prop.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                              <div className="p-6">
+                                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                                      <div>
+                                          <span className={`inline-block text-sm font-semibold px-3 py-1 rounded-full mb-3 capitalize bg-blue-200 text-blue-800`}>
+                                              {t(prop.type)} (Mock)
+                                          </span>
+                                          <h3 className="text-xl font-bold text-brand-primary mb-1">{prop.address[language] || prop.address.en}</h3>
+                                      </div>
+                                      <p className="text-2xl font-bold text-brand-secondary flex-shrink-0 mt-3 sm:mt-0 sm:ms-6">{`$${prop.price.toLocaleString()}`}</p>
+                                  </div>
+                              </div>
+                              <div className="bg-gray-50 p-4 flex justify-end items-center space-x-2 rtl:space-x-reverse">
+                                  <button
+                                      onClick={() => handleRemoveClick(prop.id)}
+                                      className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors text-sm"
+                                  >
+                                      {t('remove')}
+                                  </button>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              );
+          };
+
+          return (
+              <>
+                  <div className="container mx-auto px-4 py-8">
+                      <div className="text-center mb-8 md:mb-12">
+                          <h2 className="text-3xl md:text-4xl font-bold text-brand-primary">{t('admin_panel')}</h2>
+                      </div>
+                      
+                      <div className="max-w-4xl mx-auto">
+                          <div className="mb-6 flex border-b">
+                              <button 
+                                  onClick={() => setActiveTab('pending')}
+                                  className={`px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base transition-colors ${activeTab === 'pending' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-gray-500 hover:text-brand-dark'}`}
+                              >
+                                  {t('pending_submissions')} ({pendingSubmissions.length})
+                              </button>
+                              <button 
+                                  onClick={() => setActiveTab('published')}
+                                  className={`px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base transition-colors ${activeTab === 'published' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-gray-500 hover:text-brand-dark'}`}
+                              >
+                                  {t('published_properties')} ({mockProperties.length + approvedSubmissions.length})
+                              </button>
+                          </div>
+
+                          {activeTab === 'pending' && renderSubmissionList(pendingSubmissions)}
+                          {activeTab === 'published' && renderPublishedList()}
+                      </div>
+                  </div>
+                  {selectedPendingSubmission && (
+                      <SubmissionDetailModal
+                          submission={selectedPendingSubmission}
+                          isOpen={!!selectedPendingSubmission}
+                          onClose={() => setSelectedPendingSubmission(null)}
+                          onApprove={handleApprove}
+                          onReject={handleReject}
+                          t={t}
+                          language={language}
+                          viewMode="review"
+                      />
+                  )}
+                   {selectedPublishedSubmission && (
+                      <SubmissionDetailModal
+                          submission={selectedPublishedSubmission}
+                          isOpen={!!selectedPublishedSubmission}
+                          onClose={() => setSelectedPublishedSubmission(null)}
+                          onApprove={() => {}} // dummy
+                          onReject={() => {}} // dummy
+                          t={t}
+                          language={language}
+                          viewMode="viewOnly"
+                      />
+                  )}
+              </>
+          );
+      };
+
+      const Footer = ({ t, onShowAdmin }) => {
+        return (
+          <footer className="bg-brand-dark text-white mt-auto">
+            <div className="container mx-auto py-6 px-4 text-center">
+              <p className="text-white font-medium mb-1">{t('footer_text')}</p>
+              <p className="text-sm text-gray-400">{t('powered_by')}</p>
+              <div className="mt-4">
+                  <button onClick={onShowAdmin} className="text-sm text-gray-400 hover:text-white transition-colors">
+                      {t('admin')}
+                  </button>
+              </div>
+            </div>
+          </footer>
+        );
+      };
+
+      // --- MAIN APP ---
+
+      const App = () => {
+        const [language, setLanguage] = useState('en');
+        const { t, setLang } = useTranslations();
+        const [currentView, setCurrentView] = useState('home');
+        const [isModalOpen, setIsModalOpen] = useState(false);
+        const [activeCategory, setActiveCategory] = useState('all');
+        const [submissions, setSubmissions] = useState([]);
+        const [selectedProperty, setSelectedProperty] = useState(null);
+        const [activeFilters, setActiveFilters] = useState(initialFilterState);
+        const [mockProperties, setMockProperties] = useState(MOCK_PROPERTIES);
+
+        useEffect(() => {
+          setLang(language);
+          document.documentElement.lang = language;
+          document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+          const bodyFont = language === 'ar' ? "'Cairo', sans-serif" : "'Inter', sans-serif";
+          document.body.style.fontFamily = bodyFont;
+        }, [language, setLang]);
+
+        useEffect(() => {
+          try {
+            const storedSubmissions = localStorage.getItem('propertySubmissions');
+            if (storedSubmissions) {
+              setSubmissions(JSON.parse(storedSubmissions));
+            }
+          } catch (error) {
+            console.error("Failed to parse submissions from localStorage", error);
+          }
+        }, []);
+
+        useEffect(() => {
+          localStorage.setItem('propertySubmissions', JSON.stringify(submissions));
+        }, [submissions]);
+
+        const handleLanguageToggle = () => {
+          setLanguage((prev) => (prev === 'en' ? 'ar' : 'en'));
+        };
+
+        const handleFormSubmitSuccess = (newSubmission) => {
+          setSubmissions(prev => [...prev, newSubmission]);
+          setCurrentView('home');
+          setIsModalOpen(true);
+        };
+        
+        const handleShowHome = () => {
+          setCurrentView('home');
+          setActiveCategory('all');
+          setSelectedProperty(null);
+        };
+        
+        const handleShowAdmin = () => {
+          setCurrentView('admin');
+        };
+
+        const handleSelectCategory = (category) => {
+          setCurrentView('home');
+          setActiveCategory(category);
+        };
+
+        const handleApproveSubmission = (id, coverImage) => {
+          setSubmissions(submissions.map(s => s.id === id ? { ...s, status: 'approved', coverImage } : s));
+        };
+        
+        const handleRejectSubmission = (id) => {
+          setSubmissions(submissions.map(s => s.id === id ? { ...s, status: 'rejected' } : s));
+        };
+
+        const handleRemoveProperty = (id) => {
+          const isMock = mockProperties.some(p => p.id === id);
+          if (isMock) {
+              setMockProperties(prev => prev.filter(p => p.id !== id));
+          } else {
+              setSubmissions(prev => prev.filter(s => s.id !== id));
+          }
+        };
+
+        const handleShowPropertyDetail = (property) => {
+          setSelectedProperty(property);
+          setCurrentView('detail');
+        };
+        
+        const handleApplyFilters = (filters) => {
+          setActiveFilters(filters);
+        };
+
+        const handleResetFilters = () => {
+          setActiveFilters(initialFilterState);
+        };
+
+        const PageTitle = ({title, subtitle}) => (
+          <div className="text-center my-8 md:my-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-brand-primary">{title}</h2>
+              <p className="text-lg text-gray-600 mt-2">{subtitle}</p>
+          </div>
+        );
+
+        const approvedProperties = submissions
+          .filter(s => s.status === 'approved')
+          .map(s => ({
+            ...s.property,
+            id: s.id,
+            address: { en: s.property.fullAddress, ar: s.property.fullAddress },
+            coverImage: s.coverImage || `https://picsum.photos/seed/${s.id}/800/600`,
+          }));
+
+        const allVisibleProperties = [...mockProperties, ...approvedProperties];
+
+        const filteredProperties = allVisibleProperties
+          .filter(prop => activeCategory === 'all' || prop.type === activeCategory)
+          .filter(prop => {
+              const { location, minPrice, maxPrice, minSize, maxSize, bedrooms } = activeFilters;
+              
+              const locationMatch = !location || 
+                prop.address.en.toLowerCase().includes(location.toLowerCase()) || 
+                prop.address.ar.toLowerCase().includes(location.toLowerCase());
+              
+              const minPriceMatch = !minPrice || prop.price >= Number(minPrice);
+              const maxPriceMatch = !maxPrice || prop.price <= Number(maxPrice);
+              
+              const minSizeMatch = !minSize || prop.size >= Number(minSize);
+              const maxSizeMatch = !maxSize || prop.size <= Number(maxSize);
+              
+              const bedroomsMatch = !bedrooms || bedrooms === '0' || prop.bedrooms >= Number(bedrooms);
+              
+              return locationMatch && minPriceMatch && maxPriceMatch && minSizeMatch && maxSizeMatch && bedroomsMatch;
+            }
+          );
+
+
+        return (
+          <div className="bg-brand-light min-h-screen flex flex-col">
+            <Header
+              language={language}
+              onLanguageToggle={handleLanguageToggle}
+              t={t}
+              onShowForm={() => setCurrentView('form')}
+              onShowHome={handleShowHome}
+              activeCategory={activeCategory}
+              onSelectCategory={handleSelectCategory}
+            />
+            <main className="flex-grow">
+              {currentView === 'home' && (
+                <>
+                  <HeroSlider properties={allVisibleProperties.length > 0 ? allVisibleProperties : MOCK_PROPERTIES} t={t}/>
+                  <div className="container mx-auto px-4 py-8">
+                    <PageTitle title={t('featured_properties')} subtitle={t('explore_our_exclusive_listings')} />
+                    
+                    <FilterBar 
+                      onApply={handleApplyFilters}
+                      onReset={handleResetFilters}
+                      t={t}
+                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+                      {filteredProperties.slice(0, 6).map((prop) => (
+                        <div key={prop.id} onClick={() => handleShowPropertyDetail(prop)} className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                          <img src={prop.coverImage} alt={t(prop.type)} className="w-full h-56 object-cover"/>
+                          <div className="p-6">
+                            <span className="inline-block bg-brand-secondary text-white text-sm font-semibold px-3 py-1 rounded-full mb-3">{t(prop.type)}</span>
+                            <h3 className="text-xl font-bold text-brand-primary mb-2">{prop.address[language] || prop.address['en']}</h3>
+                            <p className="text-2xl font-bold text-brand-secondary">{`$${prop.price.toLocaleString()}`}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+              {currentView === 'form' && (
+                <div className="container mx-auto px-4 py-8">
+                  <PageTitle title={t('list_your_property')} subtitle={t('by_owner_submission_form_subtitle')} />
+                  <PropertyForm t={t} language={language} onSubmitSuccess={handleFormSubmitSuccess} />
+                </div>
+              )}
+              {currentView === 'admin' && (
+                  <AdminView
+                      t={t}
+                      language={language}
+                      pendingSubmissions={submissions.filter(s => s.status === 'pending')}
+                      approvedSubmissions={submissions.filter(s => s.status === 'approved')}
+                      mockProperties={mockProperties}
+                      onApprove={handleApproveSubmission}
+                      onReject={handleRejectSubmission}
+                      onRemovePublished={handleRemoveProperty}
+                  />
+              )}
+              {currentView === 'detail' && selectedProperty && (
+                  <PropertyDetailView property={selectedProperty} t={t} onBack={handleShowHome} language={language} />
+              )}
+            </main>
+            <Footer t={t} onShowAdmin={handleShowAdmin}/>
+            <SubmissionSuccessModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              t={t}
+            />
+          </div>
+        );
+      };
+
+      // --- RENDER ---
+      const root = ReactDOM.createRoot(document.getElementById('root'));
       root.render(<App />);
     </script>
   </body>

@@ -1,11 +1,10 @@
-
 import React from 'react';
 import UploadIcon from './icons/UploadIcon';
 import { TFunction, PropertySubmission, PropertyType } from '../types';
 
 interface FormSectionProps {
     title: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 const FormSection = ({ title, children }: FormSectionProps) => (
@@ -38,7 +37,7 @@ interface SelectFieldProps {
     name: string;
     value: string | number;
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-    children: React.ReactNode;
+    children?: React.ReactNode;
     required?: boolean;
 }
 
