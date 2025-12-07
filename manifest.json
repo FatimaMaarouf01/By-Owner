@@ -1,7 +1,8 @@
 {
   "short_name": "By Owner",
   "name": "By Owner - Property Submission Plus",
-
+  "version": "2",
+  "app_version": "2",
   "icons": [
     {
       "src": "icon-192x192.png",
@@ -14,7 +15,6 @@
       "type": "image/png"
     }
   ],
-
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#008CBC",
